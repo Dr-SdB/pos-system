@@ -33,7 +33,7 @@ tenant_urlpatterns = [
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("login/", RedirectView.as_view(url="/admin/", permanent=False)),
+    path("login/", RedirectView.as_view(url="/admin/login/", permanent=False)),
     path("", v.root_redirect, name="root"),
     path("<slug:tenant_slug>/", include(tenant_urlpatterns)),
 ]

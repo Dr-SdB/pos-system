@@ -96,9 +96,9 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ── Authentication ────────────────────────────────────────────────────────────
-LOGIN_URL = '/login/'
+LOGIN_URL = '/admin/login/'
 LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/login/'
+LOGOUT_REDIRECT_URL = '/admin/login/'
 SESSION_COOKIE_AGE = 28800          # 8 hours
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
