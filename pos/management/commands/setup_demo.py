@@ -42,9 +42,13 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f'Guest user "{guest_username}" ready.'))
 
         from pos.models import Product
-        if not Product.objects.filter(tenant=tenant).exists():
-            self.stdout.write('No products found — seeding demo data...')
-            from pos.management.commands.seed_sample_data import reset_demo_data
+        from pos.management.commands.seed_sample_data import reset_demo_data
+
+        force_reseed = os.environ.get('FORCE_RESEED', '').strip() == '1'
+
+        if force_reseed or not Product.objects.filter(tenant=tenant).exists():
+            reason = 'FORCE_RESEED=1' if force_reseed else 'no products found'
+            self.stdout.write(f'Seeding demo data ({reason})...')
             count = reset_demo_data(tenant)
             self.stdout.write(self.style.SUCCESS(f'Seeded {count} sales.'))
         else:
