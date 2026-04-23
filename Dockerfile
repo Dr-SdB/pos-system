@@ -3,18 +3,9 @@ FROM python:3.12-slim
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies + pg_dump v18 from PGDG
-# - libpq-dev is installed AFTER PGDG repo is added so apt picks libpq5 v18 (not Debian's v17)
-# - VERSION_CODENAME is read dynamically (handles trixie, bookworm, etc.)
+# Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc curl ca-certificates \
-    && install -d /usr/share/postgresql-common/pgdg \
-    && curl -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc --fail \
-       https://www.postgresql.org/media/keys/ACCC4CF8.asc \
-    && . /etc/os-release \
-    && echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" \
-       > /etc/apt/sources.list.d/pgdg.list \
-    && apt-get update && apt-get install -y --no-install-recommends postgresql-client-18 libpq-dev \
+    libpq-dev gcc \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy and install Python dependencies
