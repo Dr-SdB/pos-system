@@ -40,3 +40,12 @@ class Command(BaseCommand):
             profile.save()
 
         self.stdout.write(self.style.SUCCESS(f'Guest user "{guest_username}" ready.'))
+
+        from pos.models import Product
+        if not Product.objects.filter(tenant=tenant).exists():
+            self.stdout.write('No products found — seeding demo data...')
+            from pos.management.commands.seed_sample_data import reset_demo_data
+            count = reset_demo_data(tenant)
+            self.stdout.write(self.style.SUCCESS(f'Seeded {count} sales.'))
+        else:
+            self.stdout.write('Demo data already present — skipping seed.')

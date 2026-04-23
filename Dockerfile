@@ -30,4 +30,4 @@ ENV SECRET_KEY=$SECRET_KEY
 RUN python manage.py collectstatic --noinput
 
 # Run migrations and start Gunicorn
-CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py create_superuser_env && python manage.py setup_demo && python manage.py seed_sample_data --subdomain demo; gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 60"]
+CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py create_superuser_env && python manage.py setup_demo && gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 60"]
