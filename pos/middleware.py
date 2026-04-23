@@ -45,7 +45,7 @@ class TenantMiddleware:
 
         request.tenant = None
 
-        if slug and slug not in ('admin', 'static'):
+        if slug and slug not in ('admin', 'login', 'logout', 'static'):
             try:
                 request.tenant = Tenant.objects.get(subdomain=slug, is_active=True)
             except Tenant.DoesNotExist:
