@@ -491,8 +491,8 @@ def create_sale(request, **kwargs):
     if not items:
         return JsonResponse({"error": "No items provided"}, status=400)
 
-    payment_method = data.get("payment_method", "Dinheiro")
-    valid_methods = {"Dinheiro", "M-Pesa", "E-Mola", "eMola", "Cartao", "Transferencia", "POS"}
+    payment_method = data.get("payment_method", "Cash")
+    valid_methods = {"Cash", "M-Pesa", "E-Mola", "Card", "POS", "Transfer"}
     if payment_method not in valid_methods:
         return JsonResponse({"error": "Invalid payment method"}, status=400)
 
@@ -505,21 +505,14 @@ def create_sale(request, **kwargs):
     if flat_discount < 0:
         return JsonResponse({"error": "Flat discount cannot be negative"}, status=400)
 
-    location = str(data.get("location", "Loja")).strip()
-    if location not in {"Loja", "Online"}:
-        location = "Loja"
+    location = str(data.get("location", "Store")).strip()
+    if location not in {"Store", "Online"}:
+        location = "Store"
 
-    sale = Sale.objects.create(
-        tenant=request.tenant,
-        payment_method=payment_method,
-        customer_name=str(data.get("customer_name", "")).strip()[:255],
-        attendant=request.user.username,
-        location=location,
-        notes=str(data.get("notes", "")).strip()[:1000],
-    )
-
+    # ── Pass 1: validate items and compute totals before any DB writes ─────────
     subtotal_gross = Decimal("0")
     total_discount = Decimal("0")
+    validated_items = []
 
     for item in items:
         try:
@@ -543,7 +536,7 @@ def create_sale(request, **kwargs):
 
         if variant.current_stock < quantity:
             return JsonResponse(
-                {"error": f"Stock insuficiente para {variant.variant_sku} (disponível: {variant.current_stock})"},
+                {"error": f"Insufficient stock for {variant.variant_sku} (available: {variant.current_stock})"},
                 status=400,
             )
 
@@ -554,7 +547,33 @@ def create_sale(request, **kwargs):
 
         subtotal_gross += line_gross
         total_discount += line_discount
+        validated_items.append((variant, quantity, unit_price, line_gross, line_discount, line_net))
 
+    flat_discount = min(flat_discount, subtotal_gross - total_discount)
+    total_net = subtotal_gross - total_discount - flat_discount
+
+    if amount_paid < total_net:
+        return JsonResponse({"error": "Amount received is less than the total"}, status=400)
+
+    # ── Pass 2: write to DB ────────────────────────────────────────────────────
+    change_given = amount_paid - total_net
+
+    sale = Sale.objects.create(
+        tenant=request.tenant,
+        payment_method=payment_method,
+        customer_name=str(data.get("customer_name", "")).strip()[:255],
+        attendant=request.user.username,
+        location=location,
+        notes=str(data.get("notes", "")).strip()[:1000],
+        subtotal_gross=subtotal_gross,
+        total_discount=total_discount,
+        flat_discount=flat_discount,
+        total_net=total_net,
+        amount_paid=amount_paid,
+        change_given=change_given,
+    )
+
+    for variant, quantity, unit_price, line_gross, line_discount, line_net in validated_items:
         SaleItem.objects.create(
             sale=sale,
             product_variant=variant,
@@ -566,19 +585,6 @@ def create_sale(request, **kwargs):
         )
         variant.current_stock -= quantity
         variant.save()
-
-    # flat_discount cannot exceed the subtotal after per-item discounts
-    flat_discount = min(flat_discount, subtotal_gross - total_discount)
-    total_net = subtotal_gross - total_discount - flat_discount
-    change_given = max(Decimal("0"), amount_paid - total_net)
-
-    sale.subtotal_gross = subtotal_gross
-    sale.total_discount = total_discount
-    sale.flat_discount = flat_discount
-    sale.total_net = total_net
-    sale.amount_paid = amount_paid
-    sale.change_given = change_given
-    sale.save()
 
     return JsonResponse({
         "sale_id": sale.id,

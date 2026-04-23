@@ -86,7 +86,7 @@
       <div class="flex justify-between font-bold text-base border-t pt-3">
         <span>Total</span><span id="cartTotal">0.00 MZN</span>
       </div>
-      <div>
+      <div id="cashSection">
         <label class="text-xs text-gray-500">Amount received (MZN)</label>
         <input id="amountPaid" type="number" min="0" step="1" placeholder="0"
           class="w-full mt-1 p-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" value="0" />
@@ -129,6 +129,10 @@ document.querySelectorAll(".pay-btn").forEach(btn => {
     document.querySelectorAll(".pay-btn").forEach(b => b.classList.remove("ring-2","ring-offset-1","ring-green-400","ring-blue-400","ring-purple-400","ring-yellow-400","ring-gray-400"));
     btn.classList.add("ring-2","ring-offset-1","ring-purple-400");
     document.querySelector("#selectedPayment").value = btn.dataset.pay;
+    const isCash = btn.dataset.pay === "Cash";
+    document.querySelector("#cashSection").classList.toggle("hidden", !isCash);
+    if (!isCash) document.querySelector("#amountPaid").value = 0;
+    updateChange(getTotal());
   });
 });
 
@@ -281,9 +285,20 @@ async function checkout() {
   const btn = document.querySelector("#btnCheckout");
   btn.disabled = true; btn.textContent = "Processing…";
 
+  const total = getTotal();
+  const paymentMethod = document.querySelector("#selectedPayment").value;
+  const isCash = paymentMethod === "Cash";
+  const amountPaid = isCash ? Number(document.querySelector("#amountPaid").value || 0) : total;
+
+  if (isCash && amountPaid < total) {
+    alert(`Amount received (${mzn(amountPaid)}) is less than the total (${mzn(total)}).`);
+    btn.disabled = false; btn.textContent = "Complete Sale";
+    return;
+  }
+
   const payload = {
-    payment_method: document.querySelector("#selectedPayment").value,
-    amount_paid: Number(document.querySelector("#amountPaid").value || 0),
+    payment_method: paymentMethod,
+    amount_paid: amountPaid,
     flat_discount: Math.max(0, Number(document.querySelector("#flatDiscount").value || 0)),
     location: document.querySelector("#saleLocation").value,
     customer_name: document.querySelector("#customerName").value,
