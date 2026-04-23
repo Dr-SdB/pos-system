@@ -38,7 +38,7 @@ All frontend interactions are API-driven (fetch + JSON) with no page reloads, ke
 
 | Dashboard | New Sale | Sales History |
 |---|---|---|
-| ![Dashboard](https://pos-sdb.up.railway.app/static/screenshots/dashboard.png) | ![Sale](https://pos-sdb.up.railway.app/static/screenshots/sale.png) | ![History](https://pos-sdb.up.railway.app/static/screenshots/history.png) |
+| ![Dashboard](docs/screenshots/dashboard.jpg) | ![Sale](docs/screenshots/sales.jpg) | ![History](docs/screenshots/history.jpg) |
 
 ---
 
