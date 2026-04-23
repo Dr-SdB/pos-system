@@ -15,13 +15,14 @@ class DemoAutoLoginMiddleware:
 
     def __call__(self, request):
         if getattr(settings, 'DEMO_MODE', False) and not request.user.is_authenticated:
-            from django.contrib.auth import login
-            from django.contrib.auth.models import User
-            try:
-                guest = User.objects.get(username=settings.DEMO_GUEST_USER)
-                login(request, guest, backend='django.contrib.auth.backends.ModelBackend')
-            except User.DoesNotExist:
-                pass
+            if not request.path_info.startswith('/admin/'):
+                from django.contrib.auth import login
+                from django.contrib.auth.models import User
+                try:
+                    guest = User.objects.get(username=settings.DEMO_GUEST_USER)
+                    login(request, guest, backend='django.contrib.auth.backends.ModelBackend')
+                except User.DoesNotExist:
+                    pass
         return self.get_response(request)
 
 
