@@ -248,16 +248,16 @@ def reset_demo_data(tenant):
     ProductVariant.objects.filter(product__tenant=tenant).delete()
     Product.objects.filter(tenant=tenant).delete()
 
-    # Reset Sale ID sequence to just above the highest remaining ID so demo
-    # sales start from low numbers instead of continuing from thousands.
+    # Reset all three sequences so IDs start from 1 after the wipe.
     with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT setval(
-                pg_get_serial_sequence('pos_sale', 'id'),
-                COALESCE((SELECT MAX(id) FROM pos_sale), 0) + 1,
-                false
-            )
-        """)
+        for table in ('pos_product', 'pos_productvariant', 'pos_sale'):
+            cursor.execute(f"""
+                SELECT setval(
+                    pg_get_serial_sequence('{table}', 'id'),
+                    COALESCE((SELECT MAX(id) FROM {table}), 0) + 1,
+                    false
+                )
+            """)
 
     all_variants = _build_variants(tenant, SAMPLE_PRODUCTS)
     return _make_sales(tenant, all_variants)
