@@ -20,7 +20,6 @@ from .models import Product, ProductVariant, Sale, SaleItem, Tenant
 
 # ── Root redirect ─────────────────────────────────────────────────────────────
 
-@login_required
 def root_redirect(request):
     from django.conf import settings
     if getattr(settings, 'DEMO_MODE', False):
@@ -84,12 +83,10 @@ def _demo_readonly(view_func):
 
 
 def boss_required(view_func):
-    """Page decorator: boss (is_staff) only.
-    Unauthenticated → /login/. Employee → /<tenant>/sale/."""
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect(f'/login/?next={request.path}')
+            return redirect('/admin/')
         if not request.user.is_staff:
             slug = request.tenant.subdomain if request.tenant else ''
             return redirect(f'/{slug}/sale/')
@@ -890,17 +887,14 @@ def page_employees(request, **kwargs):
         "success": success,
     })
 
-@login_required
 def page_sale(request, **kwargs):
     _require_tenant(request)
     return render(request, "pos/sale.html")
 
-@login_required
 def page_availability(request, **kwargs):
     _require_tenant(request)
     return render(request, "pos/availability.html")
 
-@login_required
 def page_search(request, **kwargs):
     _require_tenant(request)
     return render(request, "pos/search.html")
