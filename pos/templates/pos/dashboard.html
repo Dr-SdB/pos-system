@@ -1,0 +1,318 @@
+{% extends "pos/base.html" %}
+{% load static %}
+{% block title %}Dashboard{% endblock %}
+{% block nav_home %}nav-active{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block header_actions %}
+<a href="/{{ request.tenant.subdomain }}/availability/"
+  class="text-sm px-3 py-1.5 border rounded-lg hover:bg-gray-50 transition-colors">Ver produtos
+  disponíveis</a>
+<a href="/{{ request.tenant.subdomain }}/sale/"
+  class="text-sm px-4 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">●
+  Registar venda</a>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6" id="dashboardRoot">
+
+  <!-- Month selector & summary title -->
+  <div class="flex items-center justify-between">
+    <div>
+      <p class="text-xs text-gray-400 uppercase tracking-wide">Resumo de</p>
+      <h2 class="text-xl font-bold text-gray-800" id="monthLabel">—</h2>
+    </div>
+    <div class="flex items-center gap-2">
+      <select id="selMonth"
+        class="p-2 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-300">
+        <option value="1">Janeiro</option>
+        <option value="2">Fevereiro</option>
+        <option value="3">Março</option>
+        <option value="4">Abril</option>
+        <option value="5">Maio</option>
+        <option value="6">Junho</option>
+        <option value="7">Julho</option>
+        <option value="8">Agosto</option>
+        <option value="9">Setembro</option>
+        <option value="10">Outubro</option>
+        <option value="11">Novembro</option>
+        <option value="12">Dezembro</option>
+      </select>
+      <select id="selYear"
+        class="p-2 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-300">
+        <option>2025</option>
+        <option>2026</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Top KPI banner -->
+  <div class="bg-white rounded-2xl border shadow-sm p-5">
+    <div class="flex items-start justify-between mb-4">
+      <div>
+        <p class="text-sm text-gray-400 font-medium">Distribuição de Vendas</p>
+        <p class="text-xs text-gray-400">Resumo geral das vendas geradas na plataforma</p>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 border-t pt-4">
+      <div>
+        <p class="text-2xl font-bold text-gray-800" id="kpiRevenue">—</p>
+        <p class="text-xs text-gray-400 mt-0.5">Receita</p>
+        <span id="kpiChange" class="text-xs font-medium mt-1 inline-block px-2 py-0.5 rounded-full"></span>
+      </div>
+      <div>
+        <p class="text-2xl font-bold text-gray-800" id="kpiSales">—</p>
+        <p class="text-xs text-gray-400 mt-0.5">Unidades vendidas</p>
+      </div>
+      <div>
+        <p class="text-2xl font-bold text-gray-800" id="kpiPayment">—</p>
+        <p class="text-xs text-gray-400 mt-0.5">Meio de pagamento</p>
+      </div>
+      <div>
+        <p class="text-2xl font-bold text-gray-800" id="kpiInventory">—</p>
+        <p class="text-xs text-gray-400 mt-0.5">Unidades no inventário</p>
+      </div>
+    </div>
+    <!-- Chart -->
+    <div class="mt-6 h-36 relative">
+      <canvas id="salesChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Row 2: Funcionário destaque + Low stock + Destaques -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+    <!-- Funcionário destaque -->
+    <div class="bg-white rounded-2xl border shadow-sm p-5 space-y-3">
+      <p class="text-sm font-semibold text-gray-600">🏅 Funcionário em destaque</p>
+      <div id="topAttendant" class="flex flex-col justify-center h-24">
+        <p class="text-gray-400 text-sm">—</p>
+      </div>
+    </div>
+
+    <!-- Low stock alerts -->
+    <div class="bg-white rounded-2xl border shadow-sm p-5">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-sm font-semibold text-gray-600">Alertas de stock baixo</p>
+        <span class="bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full" id="lowStockCount">0</span>
+      </div>
+      <div id="lowStockList" class="space-y-2 text-sm"></div>
+      <p class="text-xs text-gray-400 mt-3">Repor para evitar rupturas de stock</p>
+      <div class="mt-2">
+        <div class="bg-gray-100 rounded-full h-1.5 w-full">
+          <div id="stockBar" class="bg-purple-500 h-1.5 rounded-full" style="width:0%"></div>
+        </div>
+        <p class="text-xs text-gray-400 mt-1" id="stockBarLabel"></p>
+      </div>
+    </div>
+
+    <!-- Destaques (top products) -->
+    <div class="bg-white rounded-2xl border shadow-sm p-5">
+      <p class="text-sm font-semibold text-gray-600 mb-3">⭐ Destaques</p>
+      <div id="topProductsList" class="space-y-2 text-sm"></div>
+      <a href="/{{ request.tenant.subdomain }}/history/"
+        class="text-purple-600 text-xs font-medium mt-4 inline-block hover:underline">Ver vendas →</a>
+    </div>
+
+  </div>
+
+  <!-- Bottom row: 3 cards -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+    <div class="bg-white rounded-2xl border shadow-sm p-5">
+      <p class="text-sm font-semibold text-gray-600 mb-4">Meios de pagamento</p>
+      <div class="flex flex-col items-center gap-4">
+        <div class="w-28 h-28 relative flex-shrink-0">
+          <canvas id="paymentChart"></canvas>
+        </div>
+        <div id="paymentLegend" class="space-y-1.5 text-sm w-full"></div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border shadow-sm p-5">
+      <p class="text-sm font-semibold text-gray-600 mb-4">📅 Vendas por dia da semana</p>
+      <div class="h-36 relative">
+        <canvas id="weekdayChart"></canvas>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border shadow-sm p-5">
+      <p class="text-sm font-semibold text-gray-600 mb-4">🏆 Top produtos do mês</p>
+      <div id="topProductsTable" class="space-y-2"></div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const MONTHS = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+  const PAYMENT_COLORS = { "Dinheiro": "#22c55e", "M-Pesa": "#3b82f6", "E-Mola": "#f59e0b", "eMola": "#f59e0b", "Cartao": "#8b5cf6", "Transferencia": "#64748b", "POS": "#0ea5e9" };
+
+  let salesChartInst, paymentChartInst, weekdayChartInst;
+
+  function fmt(n) { return Number(n).toLocaleString("pt-MZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " MZN"; }
+
+  async function loadDashboard() {
+    const month = document.querySelector("#selMonth").value;
+    const year = document.querySelector("#selYear").value;
+
+    const res = await fetch(`/${SLUG}/api/dashboard?month=${month}&year=${year}`);
+    const d = await res.json();
+
+    // Month label
+    document.querySelector("#monthLabel").textContent = `${MONTHS[d.month - 1]} de ${d.year}`;
+
+    // KPIs
+    document.querySelector("#kpiRevenue").textContent = fmt(d.total_revenue);
+    document.querySelector("#kpiSales").textContent = d.total_units_sold;
+    document.querySelector("#kpiInventory").textContent = d.total_inventory;
+
+    // Top payment
+    const topP = Object.entries(d.payment_breakdown).sort((a, b) => b[1].total - a[1].total)[0];
+    if (topP) {
+      const pct = d.total_revenue > 0 ? Math.round(topP[1].total / d.total_revenue * 100) : 0;
+      document.querySelector("#kpiPayment").textContent = `${pct}% ${topP[0]}`;
+    }
+
+    // Revenue change badge
+    const chg = d.revenue_change_pct;
+    const chgEl = document.querySelectorAll("#kpiChange");
+    chgEl.forEach(el => {
+      el.textContent = `${chg >= 0 ? "+" : ""}${chg}%`;
+      el.className = `text-xs font-medium mt-1 inline-block px-2 py-0.5 rounded-full ${chg >= 0 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"}`;
+    });
+
+    // Funcionário destaque
+    const ta = d.top_attendant;
+    document.querySelector("#topAttendant").innerHTML = ta
+      ? `<p class="text-2xl font-bold text-gray-800">${escHtml(ta.name)}</p>
+         <p class="text-sm text-green-600 font-semibold mt-1">${fmt(ta.revenue)}</p>
+         <p class="text-xs text-gray-400 mt-0.5">${ta.count} venda${ta.count !== 1 ? 's' : ''}</p>`
+      : `<p class="text-gray-400 text-sm">Sem vendas registadas neste período</p>`;
+
+    // Sales chart
+    const labels = d.chart_data.map(x => x.day);
+    const values = d.chart_data.map(x => x.revenue);
+    const chartCfg = {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          borderColor: "#7c3aed",
+          backgroundColor: "rgba(124,58,237,0.08)",
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          borderWidth: 2,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => fmt(ctx.parsed.y) } } },
+        scales: { x: { display: false }, y: { display: false } }
+      }
+    };
+
+    if (salesChartInst) salesChartInst.destroy();
+    salesChartInst = new Chart(document.querySelector("#salesChart"), chartCfg);
+
+    // Weekday bar chart
+    if (weekdayChartInst) weekdayChartInst.destroy();
+    weekdayChartInst = new Chart(document.querySelector("#weekdayChart"), {
+      type: "bar",
+      data: {
+        labels: d.sales_by_weekday.map(x => x.day),
+        datasets: [{
+          data: d.sales_by_weekday.map(x => x.revenue),
+          backgroundColor: "#7c3aed",
+          borderRadius: 5,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => fmt(ctx.parsed.y) } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+          y: { display: false }
+        }
+      }
+    });
+
+    // Low stock
+    const lowList = document.querySelector("#lowStockList");
+    document.querySelector("#lowStockCount").textContent = d.low_stock.length;
+    lowList.innerHTML = d.low_stock.length === 0
+      ? "<p class='text-gray-400 text-xs'>Nenhum produto em stock baixo ✓</p>"
+      : d.low_stock.slice(0, 5).map(s => `
+        <div class="flex justify-between items-center">
+          <span class="text-gray-700 truncate max-w-[150px]">${escHtml(s["product__name"])} ${escHtml(s.size || "")} ${escHtml(s.color || "")}</span>
+          <span class="text-xs font-bold ${s.current_stock === 0 ? "text-red-500" : "text-yellow-600"} ml-2 flex-shrink-0">${s.current_stock === 0 ? "Esgotado" : s.current_stock + " un."}</span>
+        </div>`).join("");
+
+    // Stock bar
+    const totalInv = d.total_inventory;
+    const lowCount = d.low_stock.length;
+    const pct = totalInv > 0 ? Math.min(100, Math.round((totalInv - lowCount) / totalInv * 100)) : 0;
+    document.querySelector("#stockBar").style.width = pct + "%";
+    document.querySelector("#stockBarLabel").textContent = `${pct}% stock utilizado`;
+
+    // Top products
+    document.querySelector("#topProductsList").innerHTML = d.top_products.slice(0, 4).map((p, i) =>
+      `<div class="flex justify-between items-center text-sm">
+      <span class="text-gray-600">${["🥇", "🥈", "🥉", "4."][i]} ${escHtml(p.name)}</span>
+      <span class="font-semibold text-gray-800">${p.units} un.</span>
+    </div>`
+    ).join("") || "<p class='text-gray-400 text-xs'>Sem vendas neste período</p>";
+
+    document.querySelector("#topProductsTable").innerHTML = d.top_products.map(p =>
+      `<div class="flex justify-between items-center py-1.5 border-b last:border-0">
+      <span class="text-gray-700 text-sm">${escHtml(p.name)}</span>
+      <div class="text-right">
+        <p class="text-sm font-semibold text-gray-800">${fmt(p.revenue)}</p>
+        <p class="text-xs text-gray-400">${p.units} unidades</p>
+      </div>
+    </div>`
+    ).join("") || "<p class='text-gray-400 text-sm'>Sem dados neste período</p>";
+
+    // Payment donut chart
+    const payLabels = Object.keys(d.payment_breakdown);
+    const payValues = payLabels.map(k => d.payment_breakdown[k].total);
+    const payColors = payLabels.map(k => PAYMENT_COLORS[k] || "#94a3b8");
+
+    if (paymentChartInst) paymentChartInst.destroy();
+    if (payLabels.length > 0) {
+      paymentChartInst = new Chart(document.querySelector("#paymentChart"), {
+        type: "doughnut",
+        data: { labels: payLabels, datasets: [{ data: payValues, backgroundColor: payColors, borderWidth: 0 }] },
+        options: {
+          responsive: true, maintainAspectRatio: false, cutout: "70%",
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => fmt(ctx.parsed) } } }
+        }
+      });
+
+      const total = payValues.reduce((a, b) => a + b, 0);
+      document.querySelector("#paymentLegend").innerHTML = payLabels.map((l, i) => {
+        const pct = total > 0 ? Math.round(payValues[i] / total * 100) : 0;
+        return `<div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:${payColors[i]}"></span>
+        <span class="text-gray-600">${l}</span>
+        <span class="ml-auto font-semibold">${pct}%</span>
+      </div>`;
+      }).join("");
+    } else {
+      document.querySelector("#paymentLegend").innerHTML = "<p class='text-gray-400 text-xs'>Sem vendas neste período</p>";
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const today = new Date();
+    document.querySelector("#selMonth").value = today.getMonth() + 1;
+    document.querySelector("#selYear").value = today.getFullYear();
+    loadDashboard();
+    document.querySelector("#selMonth").addEventListener("change", loadDashboard);
+    document.querySelector("#selYear").addEventListener("change", loadDashboard);
+  });
+</script>
+{% endblock %}

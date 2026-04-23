@@ -1,0 +1,181 @@
+{% extends "pos/base.html" %}
+{% load static %}
+{% block title %}Inventário{% endblock %}
+{% block nav_inventory %}active{% endblock %}
+{% block page_title %}Inventário{% endblock %}
+
+{% block header_actions %}
+  <button onclick="loadStock(currentQuery, false)" class="text-sm px-3 py-1.5 border rounded-lg hover:bg-gray-50 transition-colors">🔄 Actualizar inventário</button>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div class="bg-white rounded-xl border shadow-sm p-4 text-center">
+      <p class="text-2xl font-bold text-gray-800" id="statTotal">–</p>
+      <p class="text-xs text-gray-500 mt-0.5">Unidades disponíveis</p>
+    </div>
+    <div id="cardInStock" class="bg-green-50 rounded-xl border border-green-100 shadow-sm p-4 text-center cursor-pointer hover:bg-green-100 transition-colors">
+      <p class="text-2xl font-bold text-green-600" id="statInStock">–</p>
+      <p class="text-xs text-green-600 mt-0.5 font-semibold">Em stock</p>
+      <p class="text-xs text-green-500 mt-0.5">Clica para filtrar</p>
+    </div>
+    <div id="cardLowStock" class="bg-yellow-50 rounded-xl border border-yellow-100 shadow-sm p-4 text-center cursor-pointer hover:bg-yellow-100 transition-colors">
+      <p class="text-2xl font-bold text-yellow-600" id="statLow">–</p>
+      <p class="text-xs text-yellow-600 mt-0.5 font-semibold">Produtos com poucas unidades</p>
+      <p class="text-xs text-yellow-500 mt-0.5">Clica para filtrar</p>
+    </div>
+    <div id="cardOutStock" class="bg-red-50 rounded-xl border border-red-100 shadow-sm p-4 text-center cursor-pointer hover:bg-red-100 transition-colors">
+      <p class="text-2xl font-bold text-red-500" id="statOut">–</p>
+      <p class="text-xs text-red-500 mt-0.5 font-semibold">Esgotados</p>
+      <p class="text-xs text-red-400 mt-0.5">Clica para filtrar</p>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="bg-white rounded-xl border shadow-sm p-4 flex items-center gap-3">
+    <input id="stockSearch" type="text" placeholder="Procurar pelo nome ou SKU…"
+      class="flex-1 p-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
+    <span id="filterBadge" class="hidden text-xs font-semibold px-2 py-1 rounded-full">
+      <span id="filterBadgeLabel"></span>
+      <button onclick="clearFilter()" class="ml-1 hover:opacity-70">✕</button>
+    </span>
+    <p class="text-xs text-gray-400 whitespace-nowrap" id="stockSubtitle"></p>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-xl border shadow-sm overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 border-b">
+        <tr>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">SKU</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Nome</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">Tamanho</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">Cor</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">Categoria</th>
+          <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Stock</th>
+        </tr>
+      </thead>
+      <tbody id="stockTable" class="divide-y divide-gray-50"></tbody>
+    </table>
+    <div id="stockEmpty" class="hidden text-center py-12 text-gray-400">
+      <p class="text-3xl mb-2">📦</p><p>Nenhum produto encontrado.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let allRows = [];
+let currentQuery = "";
+let activeFilter = "all"; // "all" | "inStock" | "low" | "outOfStock"
+
+const FILTER_CONFIG = {
+  inStock:    { label: "Em stock",             badge: "bg-green-100 text-green-700" },
+  low:        { label: "Stock baixo",          badge: "bg-yellow-100 text-yellow-700" },
+  outOfStock: { label: "Esgotados",            badge: "bg-red-100 text-red-600" },
+};
+
+async function loadStock(query="") {
+  currentQuery = query;
+
+  const res = await fetch(`/${SLUG}/api/availability?search=${encodeURIComponent(query)}`);
+  const data = await res.json();
+  allRows = data.results;
+
+  const inStock = allRows.filter(r => r.stock > 0).length;
+  const outOfStock = allRows.filter(r => r.stock === 0).length;
+  const lowStock = allRows.filter(r => r.stock > 0 && r.stock <= 5).length;
+  const total = allRows.reduce((s, r) => s + r.stock, 0);
+
+  document.querySelector("#statTotal").textContent = total;
+  document.querySelector("#statInStock").textContent = inStock;
+  document.querySelector("#statLow").textContent = lowStock;
+  document.querySelector("#statOut").textContent = outOfStock;
+
+  renderTable();
+}
+
+function renderTable() {
+  let displayRows = allRows;
+  if (activeFilter === "inStock")    displayRows = allRows.filter(r => r.stock > 0);
+  if (activeFilter === "low")        displayRows = allRows.filter(r => r.stock > 0 && r.stock <= 5);
+  if (activeFilter === "outOfStock") displayRows = allRows.filter(r => r.stock === 0);
+
+  document.querySelector("#stockSubtitle").textContent = `Exibindo ${displayRows.length} de ${allRows.length}`;
+
+  const badge = document.querySelector("#filterBadge");
+  if (activeFilter === "all") {
+    badge.classList.add("hidden");
+  } else {
+    const cfg = FILTER_CONFIG[activeFilter];
+    badge.className = `text-xs font-semibold px-2 py-1 rounded-full ${cfg.badge}`;
+    document.querySelector("#filterBadgeLabel").textContent = cfg.label;
+    badge.classList.remove("hidden");
+  }
+
+  // Highlight active card
+  document.querySelector("#cardInStock").classList.toggle("ring-2", activeFilter === "inStock");
+  document.querySelector("#cardInStock").classList.toggle("ring-green-400", activeFilter === "inStock");
+  document.querySelector("#cardLowStock").classList.toggle("ring-2", activeFilter === "low");
+  document.querySelector("#cardLowStock").classList.toggle("ring-yellow-400", activeFilter === "low");
+  document.querySelector("#cardOutStock").classList.toggle("ring-2", activeFilter === "outOfStock");
+  document.querySelector("#cardOutStock").classList.toggle("ring-red-400", activeFilter === "outOfStock");
+
+  const tbody = document.querySelector("#stockTable");
+  tbody.innerHTML = "";
+
+  if (!displayRows.length) { document.querySelector("#stockEmpty").classList.remove("hidden"); return; }
+  document.querySelector("#stockEmpty").classList.add("hidden");
+
+  displayRows.forEach(r => {
+    const out = r.stock === 0;
+    const low = r.stock > 0 && r.stock <= 5;
+    const tr = document.createElement("tr");
+    tr.className = "hover:bg-gray-50 transition-colors" + (out ? " bg-red-50" : low ? " bg-yellow-50" : "");
+    tr.innerHTML = `
+      <td class="px-4 py-3 font-mono text-xs text-gray-400">${escHtml(r.sku)}</td>
+      <td class="px-4 py-3 font-medium text-gray-800">
+        ${escHtml(r.product_name)}
+        ${r.category ? '<span class="ml-1 text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded-full">' + escHtml(r.category) + '</span>' : ""}
+      </td>
+      <td class="px-4 py-3 text-gray-500 hidden sm:table-cell">${escHtml(r.size || "–")}</td>
+      <td class="px-4 py-3 text-gray-500 hidden sm:table-cell">${escHtml(r.color || "–")}</td>
+      <td class="px-4 py-3 text-gray-400 text-xs hidden md:table-cell">${escHtml(r.category || "–")}</td>
+      <td class="px-4 py-3 text-right font-bold ${out ? "text-red-500" : low ? "text-yellow-600" : "text-gray-700"}">
+        ${out ? "Esgotado" : r.stock}${low && !out ? ' <span class="text-xs text-yellow-500">⚠️</span>' : ""}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function clearFilter() {
+  activeFilter = "all";
+  renderTable();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadStock();
+  document.querySelector("#cardInStock").addEventListener("click", () => {
+    activeFilter = activeFilter === "inStock" ? "all" : "inStock";
+    renderTable();
+  });
+  document.querySelector("#cardLowStock").addEventListener("click", () => {
+    activeFilter = activeFilter === "low" ? "all" : "low";
+    renderTable();
+  });
+  document.querySelector("#cardOutStock").addEventListener("click", () => {
+    activeFilter = activeFilter === "outOfStock" ? "all" : "outOfStock";
+    renderTable();
+  });
+  let t;
+  document.querySelector("#stockSearch").addEventListener("input", e => {
+    clearTimeout(t); t = setTimeout(() => loadStock(e.target.value.trim()), 250);
+  });
+});
+</script>
+{% endblock %}

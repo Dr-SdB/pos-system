@@ -1,0 +1,215 @@
+{% extends "pos/base.html" %}
+{% load static %}
+{% block title %}Vendas / Relatórios{% endblock %}
+{% block nav_history %}nav-active{% endblock %}
+{% block page_title %}Lista de vendas{% endblock %}
+
+{% block header_actions %}
+  <button onclick="exportCSV()" class="text-sm px-3 py-1.5 border rounded-lg hover:bg-gray-50 transition-colors">⬇ Exportar CSV</button>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="historyStats"></div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-xl border shadow-sm p-4 flex flex-wrap gap-3 items-end">
+    <div>
+      <label class="block text-xs font-medium text-gray-500 mb-1">De</label>
+      <input type="date" id="filterFrom" class="p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-gray-500 mb-1">Até</label>
+      <input type="date" id="filterTo" class="p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
+    </div>
+    <div class="flex-1 min-w-36">
+      <label class="block text-xs font-medium text-gray-500 mb-1">Produto / SKU</label>
+      <input type="text" id="filterProduct" placeholder="Ex: Calças, CIN-001…"
+        class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
+    </div>
+    <button onclick="applyFilter()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors">Filtrar</button>
+    <button onclick="clearFilter()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors">Limpar</button>
+  </div>
+
+  <!-- Truncation notice -->
+  <div id="salesTruncNotice" class="hidden bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-700">
+    A mostrar as últimas <span id="salesShowing"></span> de <span id="salesTotalCount"></span> vendas. Use os filtros de data para refinar.
+  </div>
+
+  <!-- Sales -->
+  <div id="salesList" class="space-y-2"></div>
+  <div id="salesEmpty" class="hidden text-center py-16 text-gray-400">
+    <p class="text-5xl mb-3">📋</p>
+    <p class="text-lg font-medium">Nenhuma venda encontrada</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const PAYMENT_ICONS = { Dinheiro:"💵","M-Pesa":"📱","E-Mola":"📱","eMola":"📱",Cartao:"💳",Transferencia:"🏦",POS:"💳" };
+const WEEKDAYS_PT = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+function mzn(n) { return Number(n).toLocaleString("pt-MZ",{minimumFractionDigits:2,maximumFractionDigits:2}) + " MZN"; }
+function fmtDate(s) {
+  const d = new Date(s.replace(' ', 'T'));
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  const time = s.slice(11);
+  return `${WEEKDAYS_PT[d.getDay()]}, ${day}-${month}-${year} ${time}`;
+}
+
+let currentFrom = "", currentTo = "", currentProduct = "";
+
+async function loadHistory() {
+  const params = new URLSearchParams();
+  if (currentFrom) params.set("from", currentFrom);
+  if (currentTo) params.set("to", currentTo);
+  if (currentProduct) params.set("product", currentProduct);
+  const res = await fetch(`/${SLUG}/api/sales?${params}`);
+  const data = await res.json();
+  renderHistory(data);
+}
+
+function renderHistory({ sales, summary }) {
+  const byMethod = {};
+  sales.forEach(s => { byMethod[s.payment_method] = (byMethod[s.payment_method]||0) + s.total; });
+  const topMethod = Object.entries(byMethod).sort((a,b)=>b[1]-a[1])[0];
+  const avg = summary.total_sales > 0 ? summary.total_revenue / summary.total_sales : 0;
+
+  document.querySelector("#historyStats").innerHTML = `
+    <div class="bg-white rounded-xl border shadow-sm p-4">
+      <p class="text-2xl font-bold text-gray-800">${summary.total_sales}</p>
+      <p class="text-xs text-gray-500 mt-0.5">Total de vendas</p>
+    </div>
+    <div class="bg-white rounded-xl border shadow-sm p-4">
+      <p class="text-xl font-bold text-green-600">${mzn(summary.total_revenue)}</p>
+      <p class="text-xs text-gray-500 mt-0.5">Receita total</p>
+    </div>
+    <div class="bg-white rounded-xl border shadow-sm p-4">
+      <p class="text-xl font-bold text-blue-600">${mzn(avg)}</p>
+      <p class="text-xs text-gray-500 mt-0.5">Ticket médio</p>
+    </div>
+    <div class="bg-white rounded-xl border shadow-sm p-4">
+      <p class="text-xl font-bold text-purple-600">${topMethod ? PAYMENT_ICONS[topMethod[0]]+" "+topMethod[0] : "–"}</p>
+      <p class="text-xs text-gray-500 mt-0.5">Principal pagamento</p>
+    </div>
+  `;
+
+  const list = document.querySelector("#salesList");
+  list.innerHTML = "";
+
+  // Truncation notice
+  const notice = document.querySelector("#salesTruncNotice");
+  if (summary.showing < summary.total_sales) {
+    document.querySelector("#salesShowing").textContent = summary.showing;
+    document.querySelector("#salesTotalCount").textContent = summary.total_sales;
+    notice.classList.remove("hidden");
+  } else {
+    notice.classList.add("hidden");
+  }
+
+  if (!sales.length) { document.querySelector("#salesEmpty").classList.remove("hidden"); return; }
+  document.querySelector("#salesEmpty").classList.add("hidden");
+
+  sales.forEach(sale => {
+    const card = document.createElement("div");
+    card.className = "bg-white rounded-xl border shadow-sm overflow-hidden";
+    card.innerHTML = `
+      <div class="flex items-center justify-between px-5 py-4 cursor-pointer select-none hover:bg-gray-50 transition-colors" data-toggle>
+        <div class="flex items-center gap-3">
+          <span class="text-xl">${PAYMENT_ICONS[sale.payment_method]||"💰"}</span>
+          <div>
+            <p class="font-semibold text-gray-800">Venda #${sale.id}</p>
+            <p class="text-xs text-gray-400">${fmtDate(sale.created_at)} · ${sale.payment_method} · ${sale.location||"Loja"} · ${sale.items.length} artigo${sale.items.length!==1?"s":""}${sale.customer_name?" · "+sale.customer_name:""}</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="font-bold text-gray-800">${mzn(sale.total)}</p>
+          ${sale.discount>0?`<p class="text-xs text-red-400">−${mzn(sale.discount)} desc.</p>`:""}
+        </div>
+      </div>
+      <div class="border-t hidden" data-detail>
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="text-left px-5 py-2 text-xs font-semibold text-gray-400">Produto</th>
+              <th class="text-center px-3 py-2 text-xs font-semibold text-gray-400">Qtd</th>
+              <th class="text-right px-3 py-2 text-xs font-semibold text-gray-400">Unit.</th>
+              <th class="text-right px-5 py-2 text-xs font-semibold text-gray-400">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${sale.items.map(i=>`
+              <tr class="border-t border-gray-50">
+                <td class="px-5 py-2 text-gray-700">${i.product_name}${i.size?" · "+i.size:""}${i.color?" · "+i.color:""}</td>
+                <td class="px-3 py-2 text-center text-gray-500">${i.quantity}</td>
+                <td class="px-3 py-2 text-right text-gray-500">${mzn(i.unit_price)}</td>
+                <td class="px-5 py-2 text-right font-medium">${mzn(i.line_total)}</td>
+              </tr>`).join("")}
+          </tbody>
+        </table>
+        <div class="px-5 py-3 bg-gray-50 flex flex-wrap justify-between gap-2 text-sm">
+          <span class="text-gray-500">
+            Local: <b>${sale.location||"Loja"}</b>
+            ${sale.attendant?" · Atendente: <b>"+sale.attendant+"</b>":""}
+            ${" · "}Recebido: <b>${mzn(sale.amount_paid)}</b>
+            ${sale.change>0?" · Troco: <b class='text-green-600'>"+mzn(sale.change)+"</b>":""}
+          </span>
+          <div class="flex items-center gap-3">
+            <span class="font-bold text-gray-800">Total: ${mzn(sale.total)}</span>
+            <button onclick="voidSale(${sale.id}, this)"
+              class="text-xs px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors border border-red-200">
+              🗑 Anular
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    card.querySelector("[data-toggle]").addEventListener("click", () => {
+      card.querySelector("[data-detail]").classList.toggle("hidden");
+    });
+    list.appendChild(card);
+  });
+}
+
+function applyFilter() {
+  currentFrom = document.querySelector("#filterFrom").value;
+  currentTo = document.querySelector("#filterTo").value;
+  currentProduct = document.querySelector("#filterProduct").value.trim();
+  loadHistory();
+}
+function clearFilter() {
+  currentFrom = ""; currentTo = ""; currentProduct = "";
+  document.querySelector("#filterFrom").value = "";
+  document.querySelector("#filterTo").value = "";
+  document.querySelector("#filterProduct").value = "";
+  loadHistory();
+}
+
+async function voidSale(saleId, btn) {
+  if (!confirm(`Anular venda #${saleId}? O stock será reposto. Esta ação não pode ser desfeita.`)) return;
+  btn.disabled = true; btn.textContent = "A anular…";
+  try {
+    const res = await fetch(`/${SLUG}/api/sales/${saleId}/void`, {
+      method: "DELETE",
+      headers: csrfHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) { alert("Erro: " + (data.error || "Erro desconhecido")); btn.disabled = false; btn.textContent = "🗑 Anular"; return; }
+    loadHistory();
+  } catch { alert("Erro de rede. Tente novamente."); btn.disabled = false; btn.textContent = "🗑 Anular"; }
+}
+
+function exportCSV() {
+  const params = new URLSearchParams();
+  if (currentFrom) params.set("from", currentFrom);
+  if (currentTo) params.set("to", currentTo);
+  window.location.href = `/${SLUG}/api/sales/export?${params}`;
+}
+
+document.addEventListener("DOMContentLoaded", loadHistory);
+</script>
+{% endblock %}

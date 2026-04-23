@@ -1,0 +1,63 @@
+# Claude Code session data
+.claude/
+
+# Environment variables — NEVER commit these
+.env
+.env.local
+.env.production
+.env.staging
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+staticfiles/
+mediafiles/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Office files
+*.xlsx
+*.xls
+*.csv
+
+# Node / Playwright
+node_modules/
+test-results/
+playwright-report/
+package-lock.json
+
+# Secrets
+*.pem
+*.key
+*.cert
+secrets.json

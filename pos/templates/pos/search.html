@@ -1,0 +1,80 @@
+{% extends "pos/base.html" %}
+{% load static %}
+{% block title %}Pesquisa{% endblock %}
+{% block page_title %}Pesquisa de Produtos{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+  <input type="text" id="searchInput" placeholder="Pesquisar produtos por nome ou SKU…"
+    class="w-full p-4 text-base border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white shadow-sm" />
+
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <select id="filterSize" class="p-3 border rounded-xl bg-white text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none">
+      <option value="all">Todos os Tamanhos</option>
+      <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option>
+    </select>
+    <select id="filterColor" class="p-3 border rounded-xl bg-white text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none">
+      <option value="all">Todas as Cores</option>
+      <option>Branco</option><option>Preto</option><option>Azul</option><option>Vermelho</option>
+    </select>
+    <select id="filterCategory" class="p-3 border rounded-xl bg-white text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none">
+      <option value="all">Todas as Categorias</option>
+    </select>
+  </div>
+
+  <div id="productsList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function mzn(n) { return Number(n).toLocaleString("pt-MZ",{minimumFractionDigits:2,maximumFractionDigits:2}) + " MZN"; }
+
+async function runSearch() {
+  const params = { search: document.querySelector("#searchInput").value.trim() };
+  const size = document.querySelector("#filterSize").value;
+  const color = document.querySelector("#filterColor").value;
+  const category = document.querySelector("#filterCategory").value;
+  if (size !== "all") params.size = size;
+  if (color !== "all") params.color = color;
+  if (category !== "all") params.category = category;
+
+  const res = await fetch(`/${SLUG}/api/products?` + new URLSearchParams(params));
+  const data = await res.json();
+  const container = document.querySelector("#productsList");
+  container.innerHTML = "";
+
+  if (!data.results.length) {
+    container.innerHTML = "<div class='col-span-full text-center py-12 text-gray-400'><p class='text-4xl mb-2'>🔍</p><p>Nenhum produto encontrado.</p></div>";
+    return;
+  }
+
+  data.results.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "bg-white rounded-xl border shadow-sm p-4 space-y-3";
+    card.innerHTML = `
+      <div class="flex justify-between items-start">
+        <div><h2 class="font-semibold text-gray-800">${p.product_name}</h2><p class="text-xs text-gray-400">${p.sku}</p></div>
+        ${p.category?`<span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">${p.category}</span>`:""}
+      </div>
+      <div class="flex gap-2 text-sm text-gray-600">
+        ${p.size?`<span class="bg-gray-100 px-2 py-0.5 rounded">📐 ${p.size}</span>`:""}
+        ${p.color?`<span class="bg-gray-100 px-2 py-0.5 rounded">🎨 ${p.color}</span>`:""}
+      </div>
+      <div class="flex items-center justify-between">
+        <span class="text-xl font-bold text-gray-800">${mzn(p.price)}</span>
+        <span class="text-sm ${p.stock>0?"text-green-600":"text-red-500"}">${p.stock>0?"✓ "+p.stock+" em stock":"✗ Esgotado"}</span>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  runSearch();
+  let t;
+  document.querySelector("#searchInput").addEventListener("input", () => { clearTimeout(t); t = setTimeout(runSearch,250); });
+  document.querySelectorAll("#filterSize,#filterColor,#filterCategory").forEach(el => el.addEventListener("change", runSearch));
+});
+</script>
+{% endblock %}

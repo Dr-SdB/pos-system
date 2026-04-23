@@ -1,0 +1,211 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ request.tenant.name }} – {% block title %}{% endblock %}</title>
+  <script>
+    // Set tenant primary color before Tailwind loads so overrides apply correctly
+    const PRIMARY = '{{ request.tenant.primary_color|default:"#7c3aed" }}';
+    // Compute a darker shade (~20% darker) for hover states
+    function adjustHex(hex, amt) {
+      const n = parseInt(hex.slice(1), 16);
+      const r = Math.max(0, Math.min(255, (n >> 16) + amt));
+      const g = Math.max(0, Math.min(255, ((n >> 8) & 0xff) + amt));
+      const b = Math.max(0, Math.min(255, (n & 0xff) + amt));
+      return '#' + ((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1);
+    }
+    const PRIMARY_DARK = adjustHex(PRIMARY, -30);
+    const PRIMARY_LIGHT = adjustHex(PRIMARY, 120);
+    document.documentElement.style.setProperty('--primary', PRIMARY);
+    document.documentElement.style.setProperty('--primary-dark', PRIMARY_DARK);
+    document.documentElement.style.setProperty('--primary-light', PRIMARY_LIGHT);
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+
+    body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #f4f6fb; }
+
+    /* ── Tenant color overrides — replaces all Tailwind purple-* classes ── */
+    :root { --primary: #7c3aed; --primary-dark: #5b21b6; --primary-light: #ede9fe; }
+    .bg-purple-600, .bg-purple-500 { background-color: var(--primary) !important; }
+    .hover\:bg-purple-700:hover, .hover\:bg-purple-600:hover { background-color: var(--primary-dark) !important; }
+    .bg-purple-100 { background-color: var(--primary-light) !important; }
+    .text-purple-600, .text-purple-700 { color: var(--primary) !important; }
+    .border-purple-300 { border-color: var(--primary) !important; }
+    .focus\:ring-purple-300:focus { --tw-ring-color: var(--primary-light) !important; }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0; width: 220px;
+      background: #18181b; display: flex; flex-direction: column;
+      z-index: 30; box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+    }
+
+    #sidebar .logo {
+      padding: 22px 20px 18px;
+      border-bottom: 1px solid #27272a;
+      display: flex; align-items: center; gap: 10px;
+    }
+    #sidebar .logo .icon {
+      width: 36px; height: 36px; background: var(--primary);
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; font-size: 18px; flex-shrink: 0;
+    }
+    #sidebar .logo .title { color: #fff; font-weight: 700; font-size: 16px; line-height: 1.2; letter-spacing: -0.01em; }
+    #sidebar .logo .sub { color: #71717a; font-size: 11px; margin-top: 1px; }
+
+    #sidebar nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; }
+
+    #sidebar nav a {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 8px;
+      color: #a1a1aa; font-size: 13.5px; font-weight: 500;
+      text-decoration: none; transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    #sidebar nav a:hover { background: #27272a; color: #fff; }
+    #sidebar nav a.active { background: var(--primary); color: #fff; }
+    #sidebar nav a .nav-icon { font-size: 15px; flex-shrink: 0; width: 20px; text-align: center; }
+
+    #sidebar .nav-section {
+      padding: 4px 12px 2px;
+      font-size: 10px; font-weight: 600; color: #52525b;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-top: 8px;
+    }
+
+    #sidebar .bottom { padding: 10px; border-top: 1px solid #27272a; }
+
+    /* ── Main ── */
+    #main { margin-left: 220px; min-height: 100vh; display: flex; flex-direction: column; }
+
+    #topbar {
+      background: #fff; border-bottom: 1px solid #e4e7ec;
+      padding: 12px 24px; display: flex; align-items: center;
+      justify-content: space-between; position: sticky; top: 0; z-index: 10;
+    }
+    #topbar h1 { font-size: 15px; font-weight: 600; color: #374151; margin: 0; }
+
+    .avatar {
+      width: 32px; height: 32px; background: var(--primary); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 13px; font-weight: 700; flex-shrink: 0;
+    }
+
+    #page-content { flex: 1; padding: 24px; }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside id="sidebar">
+    <div class="logo">
+      <div class="icon">{{ request.tenant.icon|default:"🏪" }}</div>
+      <div>
+        <div class="title">{{ request.tenant.name }}</div>
+        <div class="sub">Gestão Inteligente</div>
+      </div>
+    </div>
+
+    <nav>
+      {% if request.user.is_staff %}
+      <a href="/{{ request.tenant.subdomain }}/" class="{% block nav_home %}{% endblock %}">
+        <span class="nav-icon">📊</span> Dashboard
+      </a>
+      {% endif %}
+
+      <div class="nav-section">Produtos</div>
+      {% if request.user.is_staff %}
+      <a href="/{{ request.tenant.subdomain }}/catalogue/" class="{% block nav_catalogue %}{% endblock %}">
+        <span class="nav-icon">📦</span> Catálogo
+      </a>
+      {% endif %}
+      <a href="/{{ request.tenant.subdomain }}/availability/" class="{% block nav_inventory %}{% endblock %}">
+        <span class="nav-icon">🗃️</span> Inventário
+      </a>
+      {% if request.user.is_staff %}
+      <a href="/{{ request.tenant.subdomain }}/restock/" class="{% block nav_restock %}{% endblock %}">
+        <span class="nav-icon">📥</span> Repor Stock
+      </a>
+      <a href="/{{ request.tenant.subdomain }}/adjustments/" class="{% block nav_adjustments %}{% endblock %}">
+        <span class="nav-icon">📋</span> Histórico Ajustes
+      </a>
+      <a href="/{{ request.tenant.subdomain }}/employees/" class="{% block nav_employees %}{% endblock %}">
+        <span class="nav-icon">👥</span> Funcionários
+      </a>
+      {% endif %}
+
+      <div class="nav-section">Vendas</div>
+      <a href="/{{ request.tenant.subdomain }}/sale/" class="{% block nav_sale %}{% endblock %}">
+        <span class="nav-icon">🛒</span> Vendas
+      </a>
+      {% if request.user.is_staff %}
+      <a href="/{{ request.tenant.subdomain }}/history/" class="{% block nav_history %}{% endblock %}">
+        <span class="nav-icon">📋</span> Lista de vendas
+      </a>
+      {% endif %}
+    </nav>
+
+    <div class="bottom" style="display:flex;flex-direction:column;gap:4px;">
+      <!-- User info -->
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;">
+        <div style="width:28px;height:28px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0;">
+          {{ request.user.username|first|upper }}
+        </div>
+        <div style="overflow:hidden;">
+          <p style="color:#e4e4e7;font-size:13px;font-weight:500;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ request.user.username }}</p>
+          <p style="color:#52525b;font-size:11px;margin:0;">{% if request.user.is_staff %}Gerente{% else %}Atendente{% endif %}</p>
+        </div>
+      </div>
+      <form method="post" action="/logout/" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:#a1a1aa;font-size:13.5px;font-weight:500;background:none;border:none;cursor:pointer;transition:background 0.15s,color 0.15s;text-align:left;" onmouseover="this.style.background='#27272a';this.style.color='#fff'" onmouseout="this.style.background='';this.style.color='#a1a1aa'">
+          <span style="font-size:15px;width:20px;text-align:center">🚪</span> Sair
+        </button>
+      </form>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div id="main">
+    <header id="topbar">
+      <h1>{% block page_title %}{% endblock %}</h1>
+      <div style="display:flex;align-items:center;gap:12px;">
+        {% block header_actions %}{% endblock %}
+        <div class="avatar" title="{{ request.user.username }}">{{ request.user.username|first|upper }}</div>
+      </div>
+    </header>
+    <div id="page-content">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+  <script>
+    // Tenant slug — injected once here, used by all pages for API and nav URLs
+    const SLUG = '{{ request.tenant.subdomain }}';
+
+    // CSRF helper — include in every state-mutating fetch call
+    function csrfToken() {
+      const match = document.cookie.split(';').find(c => c.trim().startsWith('csrftoken='));
+      return match ? match.split('=')[1] : '';
+    }
+    function csrfHeaders() {
+      return { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken() };
+    }
+    // XSS helper — always use this when inserting user data into innerHTML
+    function escHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

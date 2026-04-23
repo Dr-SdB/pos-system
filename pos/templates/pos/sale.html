@@ -1,0 +1,321 @@
+{% extends "pos/base.html" %}
+{% load static %}
+{% block title %}Vendas{% endblock %}
+{% block nav_sale %}nav-active{% endblock %}
+{% block page_title %}Registar Venda{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+  <!-- Left: Product search -->
+  <div class="space-y-4">
+    <div class="bg-white rounded-xl border shadow-sm p-4">
+      <p class="font-semibold text-gray-700 mb-3">Produto</p>
+      <div class="relative">
+        <input id="saleSearch" type="text" placeholder="Procurar pelo nome ou SKU…"
+          class="w-full p-3 pr-10 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
+        <span class="absolute right-3 top-3 text-gray-400">🔍</span>
+      </div>
+      <div id="searchResults" class="mt-3 space-y-2 max-h-72 overflow-y-auto"></div>
+    </div>
+
+    <!-- Sale details -->
+    <div class="bg-white rounded-xl border shadow-sm p-4 space-y-3">
+      <p class="font-semibold text-gray-700">🧾 Detalhes da Venda</p>
+
+      <div>
+        <p class="text-xs text-gray-500 font-medium mb-2">Método de pagamento</p>
+        <div class="flex flex-wrap gap-2" id="paymentBtns">
+          <button data-pay="Dinheiro" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-green-100 text-green-700 ring-2 ring-green-400">Dinheiro</button>
+          <button data-pay="M-Pesa" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-blue-100 text-blue-700">M-Pesa</button>
+          <button data-pay="eMola" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-yellow-100 text-yellow-700">eMola</button>
+          <button data-pay="POS" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-blue-100 text-blue-700">POS</button>
+          <button data-pay="Cartao" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-purple-100 text-purple-700">Cartão</button>
+          <button data-pay="Transferencia" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-gray-100 text-gray-600">Transferência</button>
+        </div>
+        <input type="hidden" id="selectedPayment" value="Dinheiro" />
+      </div>
+
+      <div>
+        <label class="text-xs text-gray-500 font-medium">Local de venda</label>
+        <select id="saleLocation" class="w-full mt-1 p-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 bg-white">
+          <option value="Loja">Loja</option>
+          <option value="Online">Online</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="text-xs text-gray-500 font-medium">Dados do cliente (opcional)</label>
+        <input id="customerName" type="text" placeholder="Nome, contacto e outras informações do cliente"
+          class="w-full mt-1 p-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Cart -->
+  <div class="space-y-4">
+    <div class="bg-white rounded-xl border shadow-sm p-4">
+      <div class="flex items-center gap-2 mb-4">
+        <span>🛒</span>
+        <p class="font-semibold text-gray-700">Carrinho</p>
+      </div>
+      <div id="cartItems" class="space-y-3 min-h-24">
+        <div class="flex flex-col items-center justify-center h-24 text-gray-400">
+          <span class="text-3xl">🛒</span>
+          <p class="text-sm mt-1">Seleccione um produto para continuar</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Totals -->
+    <div class="bg-white rounded-xl border shadow-sm p-4 space-y-3">
+      <div class="flex justify-between text-sm text-gray-500">
+        <span>Subtotal</span><span id="cartSubtotal">0,00 MZN</span>
+      </div>
+      <div id="discountRow" class="hidden flex justify-between text-sm text-red-500">
+        <span>Desconto artigos</span><span>−<span id="cartDiscount">0,00</span> MZN</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <label class="text-xs text-gray-500 whitespace-nowrap">Desconto geral (MZN)</label>
+        <input id="flatDiscount" type="number" min="0" step="1" placeholder="0"
+          class="w-full p-2 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" value="0" />
+      </div>
+      <div id="flatDiscountRow" class="hidden flex justify-between text-sm text-red-500">
+        <span>Desconto geral</span><span>−<span id="cartFlatDiscount">0,00</span> MZN</span>
+      </div>
+      <div class="flex justify-between font-bold text-base border-t pt-3">
+        <span>Total</span><span id="cartTotal">0,00 MZN</span>
+      </div>
+      <div>
+        <label class="text-xs text-gray-500">Montante recebido (MZN)</label>
+        <input id="amountPaid" type="number" min="0" step="1" placeholder="0"
+          class="w-full mt-1 p-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" value="0" />
+        <div class="flex justify-between text-sm text-green-600 font-medium mt-1.5">
+          <span>Troco</span><span id="changeDisplay">0,00 MZN</span>
+        </div>
+      </div>
+      <button id="btnCheckout" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition-colors">
+        Registar Venda
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Receipt modal -->
+<div id="receiptModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center space-y-4">
+    <div class="text-5xl">✅</div>
+    <h2 class="text-2xl font-bold">Venda Registada!</h2>
+    <p id="receiptSub" class="text-gray-500 text-sm"></p>
+    <div id="receiptBody" class="bg-gray-50 rounded-xl p-4 space-y-1 text-sm text-left"></div>
+    <button onclick="document.querySelector('#receiptModal').classList.add('hidden')" 
+      class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-xl">
+      Nova Venda
+    </button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function getCart() { return JSON.parse(localStorage.getItem("pos_cart") || "[]"); }
+function saveCart(c) { localStorage.setItem("pos_cart", JSON.stringify(c)); }
+function clearCart() { localStorage.removeItem("pos_cart"); }
+function mzn(n) { return Number(n).toLocaleString("pt-MZ", {minimumFractionDigits:2, maximumFractionDigits:2}) + " MZN"; }
+
+// Payment buttons
+document.querySelectorAll(".pay-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".pay-btn").forEach(b => b.classList.remove("ring-2","ring-offset-1","ring-green-400","ring-blue-400","ring-purple-400","ring-yellow-400","ring-gray-400"));
+    btn.classList.add("ring-2","ring-offset-1","ring-purple-400");
+    document.querySelector("#selectedPayment").value = btn.dataset.pay;
+  });
+});
+
+// Product search
+let searchTimer;
+let _searchResults = [];
+document.querySelector("#saleSearch").addEventListener("input", e => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => searchProducts(e.target.value.trim()), 200);
+});
+
+async function searchProducts(q) {
+  if (!q) { document.querySelector("#searchResults").innerHTML = ""; return; }
+  const res = await fetch(`/${SLUG}/api/products?search=${encodeURIComponent(q)}`);
+  const data = await res.json();
+  _searchResults = data.results;
+  const container = document.querySelector("#searchResults");
+  if (!data.results.length) {
+    container.innerHTML = "<p class='text-sm text-gray-400 text-center py-3'>Nenhum resultado</p>";
+    return;
+  }
+  container.innerHTML = data.results.map((p, i) => `
+    <div class="flex items-center justify-between p-3 border rounded-xl hover:bg-purple-50 cursor-pointer transition-colors"
+         onclick="addToCart(_searchResults[${i}])">
+      <div>
+        <p class="font-medium text-sm text-gray-800">${escHtml(p.product_name)}</p>
+        <p class="text-xs text-gray-400">${escHtml(p.sku)}${p.size?' · '+escHtml(p.size):''}${p.color?' · '+escHtml(p.color):''}</p>
+      </div>
+      <div class="text-right">
+        <p class="font-bold text-sm text-gray-800">${mzn(p.price)}</p>
+        <p class="text-xs ${p.stock>0?'text-green-600':'text-red-500'}">${p.stock>0?p.stock+' em stock':'Esgotado'}</p>
+      </div>
+    </div>
+  `).join("");
+}
+
+function addToCart(item) {
+  if (item.stock <= 0) return;
+  const cart = getCart();
+  const existing = cart.find(x => x.variant_id === item.id);
+  if (existing) { existing.quantity += 1; }
+  else { cart.push({ variant_id: item.id, name: item.product_name, sku: item.sku, size: item.size, color: item.color, price: item.price, quantity: 1, discount_percent: 0 }); }
+  saveCart(cart);
+  renderCart();
+  document.querySelector("#saleSearch").value = "";
+  document.querySelector("#searchResults").innerHTML = "";
+}
+
+function renderCart() {
+  const cart = getCart();
+  const container = document.querySelector("#cartItems");
+
+  if (!cart.length) {
+    container.innerHTML = `<div class="flex flex-col items-center justify-center h-24 text-gray-400">
+      <span class="text-3xl">🛒</span><p class="text-sm mt-1">Seleccione um produto para continuar</p>
+    </div>`;
+    updateTotals(0,0,0);
+    return;
+  }
+
+  let subtotal = 0, discountTotal = 0;
+  const flatDisc = Math.max(0, Number(document.querySelector("#flatDiscount").value || 0));
+
+  container.innerHTML = cart.map((item, i) => {
+    const gross = item.price * item.quantity;
+    const disc = gross * (item.discount_percent || 0) / 100;
+    const net = gross - disc;
+    subtotal += gross; discountTotal += disc;
+    return `
+    <div class="flex items-start gap-3 p-3 border rounded-xl">
+      <div class="flex-1 min-w-0">
+        <p class="font-medium text-sm text-gray-800 truncate">${escHtml(item.name)}</p>
+        <p class="text-xs text-gray-400">${escHtml(item.sku)}${item.size?' · '+escHtml(item.size):''}${item.color?' · '+escHtml(item.color):''}</p>
+        <div class="flex items-center gap-3 mt-2">
+          <div class="flex items-center border rounded-lg overflow-hidden text-sm">
+            <button onclick="changeQty(${i},-1)" class="px-2 py-1 bg-gray-50 hover:bg-gray-100">−</button>
+            <input type="number" min="1" value="${item.quantity}"
+              onchange="setQty(${i}, this.value)"
+              onclick="this.select()"
+              class="w-12 py-1 text-center border-x text-sm focus:outline-none focus:bg-purple-50" />
+            <button onclick="changeQty(${i},1)" class="px-2 py-1 bg-gray-50 hover:bg-gray-100">+</button>
+          </div>
+          <div class="flex items-center gap-1 text-xs text-gray-500">
+            <span>Desc.</span>
+            <input type="number" min="0" max="100" value="${item.discount_percent||0}"
+              onchange="setDiscount(${i}, this.value)"
+              class="w-12 p-1 border rounded text-center text-xs focus:outline-none focus:ring-1 focus:ring-purple-300" />
+            <span>%</span>
+          </div>
+        </div>
+      </div>
+      <div class="text-right flex-shrink-0">
+        ${disc>0?`<p class="text-xs text-gray-300 line-through">${mzn(gross)}</p>`:''}
+        <p class="font-bold text-sm">${mzn(net)}</p>
+        <button onclick="removeFromCart(${i})" class="text-gray-300 hover:text-red-500 text-lg leading-none mt-1">✕</button>
+      </div>
+    </div>`;
+  }).join("");
+
+  const effectiveFlat = Math.min(flatDisc, Math.max(0, subtotal - discountTotal));
+  updateTotals(subtotal, discountTotal, effectiveFlat, subtotal - discountTotal - effectiveFlat);
+}
+
+function updateTotals(sub, disc, flat, total) {
+  document.querySelector("#cartSubtotal").textContent = mzn(sub);
+  document.querySelector("#cartTotal").textContent = mzn(total);
+  const discRow = document.querySelector("#discountRow");
+  discRow.classList.toggle("hidden", disc === 0);
+  document.querySelector("#cartDiscount").textContent = Number(disc).toLocaleString("pt-MZ",{minimumFractionDigits:2,maximumFractionDigits:2});
+  const flatRow = document.querySelector("#flatDiscountRow");
+  flatRow.classList.toggle("hidden", flat === 0);
+  document.querySelector("#cartFlatDiscount").textContent = Number(flat).toLocaleString("pt-MZ",{minimumFractionDigits:2,maximumFractionDigits:2});
+  updateChange(total);
+}
+
+function updateChange(total) {
+  const paid = Number(document.querySelector("#amountPaid").value || 0);
+  const change = Math.max(0, paid - (total || 0));
+  document.querySelector("#changeDisplay").textContent = mzn(change);
+}
+
+function changeQty(i, delta) {
+  const c = getCart(); c[i].quantity = Math.max(1, c[i].quantity + delta); saveCart(c); renderCart();
+}
+function setQty(i, val) {
+  const c = getCart(); c[i].quantity = Math.max(1, parseInt(val) || 1); saveCart(c); renderCart();
+}
+function setDiscount(i, val) {
+  const c = getCart(); c[i].discount_percent = Math.max(0, Math.min(100, Number(val))); saveCart(c); renderCart();
+}
+function removeFromCart(i) {
+  const c = getCart(); c.splice(i, 1); saveCart(c); renderCart();
+}
+
+function getTotal() {
+  const cart = getCart();
+  const sub = cart.reduce((s,x) => s + x.price * x.quantity, 0);
+  const itemDisc = cart.reduce((s,x) => s + x.price * x.quantity * (x.discount_percent||0)/100, 0);
+  const flat = Math.min(Math.max(0, Number(document.querySelector("#flatDiscount").value || 0)), sub - itemDisc);
+  return sub - itemDisc - flat;
+}
+
+document.querySelector("#amountPaid").addEventListener("input", () => updateChange(getTotal()));
+document.querySelector("#flatDiscount").addEventListener("input", () => renderCart());
+
+async function checkout() {
+  const cart = getCart();
+  if (!cart.length) return;
+
+  const btn = document.querySelector("#btnCheckout");
+  btn.disabled = true; btn.textContent = "A processar…";
+
+  const payload = {
+    payment_method: document.querySelector("#selectedPayment").value,
+    amount_paid: Number(document.querySelector("#amountPaid").value || 0),
+    flat_discount: Math.max(0, Number(document.querySelector("#flatDiscount").value || 0)),
+    location: document.querySelector("#saleLocation").value,
+    customer_name: document.querySelector("#customerName").value,
+    items: cart.map(x => ({ variant_id: x.variant_id, quantity: x.quantity, discount_percent: x.discount_percent || 0 })),
+  };
+
+  try {
+    const res = await fetch(`/${SLUG}/api/sale`, { method:"POST", headers: csrfHeaders(), body:JSON.stringify(payload) });
+    const data = await res.json();
+
+    if (!res.ok || data.error) {
+      alert("Erro: " + (data.error || "Erro desconhecido")); return;
+    }
+
+    clearCart();
+    document.querySelector("#flatDiscount").value = 0;
+    renderCart();
+    document.querySelector("#receiptSub").textContent = `Venda #${data.sale_id} · ${data.payment_method}`;
+    document.querySelector("#receiptBody").innerHTML = `
+      <div class="flex justify-between"><span class="text-gray-500">Subtotal</span><span>${mzn(data.subtotal)}</span></div>
+      ${data.discount_total > 0 ? `<div class="flex justify-between text-red-500"><span>Desconto artigos</span><span>−${mzn(data.discount_total)}</span></div>` : ""}
+      ${data.flat_discount > 0 ? `<div class="flex justify-between text-red-500"><span>Desconto geral</span><span>−${mzn(data.flat_discount)}</span></div>` : ""}
+      <div class="flex justify-between font-bold border-t pt-1"><span>Total</span><span>${mzn(data.total)}</span></div>
+      ${data.amount_paid > 0 ? `<div class="flex justify-between text-gray-500"><span>Recebido</span><span>${mzn(data.amount_paid)}</span></div>` : ""}
+      ${data.change > 0 ? `<div class="flex justify-between text-green-600 font-medium"><span>Troco</span><span>${mzn(data.change)}</span></div>` : ""}
+    `;
+    document.querySelector("#receiptModal").classList.remove("hidden");
+  } catch { alert("Erro de rede. Tente novamente."); }
+  finally { btn.disabled = false; btn.textContent = "Registar Venda"; }
+}
+
+document.querySelector("#btnCheckout").addEventListener("click", checkout);
+document.addEventListener("DOMContentLoaded", renderCart);
+</script>
+{% endblock %}
