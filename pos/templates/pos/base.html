@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -107,7 +107,7 @@
       <div class="icon">{{ request.tenant.icon|default:"🏪" }}</div>
       <div>
         <div class="title">{{ request.tenant.name }}</div>
-        <div class="sub">Gestão Inteligente</div>
+        <div class="sub">Smart Management</div>
       </div>
     </div>
 
@@ -118,34 +118,34 @@
       </a>
       {% endif %}
 
-      <div class="nav-section">Produtos</div>
+      <div class="nav-section">Products</div>
       {% if request.user.is_staff %}
       <a href="/{{ request.tenant.subdomain }}/catalogue/" class="{% block nav_catalogue %}{% endblock %}">
-        <span class="nav-icon">📦</span> Catálogo
+        <span class="nav-icon">📦</span> Catalogue
       </a>
       {% endif %}
       <a href="/{{ request.tenant.subdomain }}/availability/" class="{% block nav_inventory %}{% endblock %}">
-        <span class="nav-icon">🗃️</span> Inventário
+        <span class="nav-icon">🗃️</span> Inventory
       </a>
       {% if request.user.is_staff %}
       <a href="/{{ request.tenant.subdomain }}/restock/" class="{% block nav_restock %}{% endblock %}">
-        <span class="nav-icon">📥</span> Repor Stock
+        <span class="nav-icon">📥</span> Restock
       </a>
       <a href="/{{ request.tenant.subdomain }}/adjustments/" class="{% block nav_adjustments %}{% endblock %}">
-        <span class="nav-icon">📋</span> Histórico Ajustes
+        <span class="nav-icon">📋</span> Adj. History
       </a>
       <a href="/{{ request.tenant.subdomain }}/employees/" class="{% block nav_employees %}{% endblock %}">
-        <span class="nav-icon">👥</span> Funcionários
+        <span class="nav-icon">👥</span> Employees
       </a>
       {% endif %}
 
-      <div class="nav-section">Vendas</div>
+      <div class="nav-section">Sales</div>
       <a href="/{{ request.tenant.subdomain }}/sale/" class="{% block nav_sale %}{% endblock %}">
-        <span class="nav-icon">🛒</span> Vendas
+        <span class="nav-icon">🛒</span> New Sale
       </a>
       {% if request.user.is_staff %}
       <a href="/{{ request.tenant.subdomain }}/history/" class="{% block nav_history %}{% endblock %}">
-        <span class="nav-icon">📋</span> Lista de vendas
+        <span class="nav-icon">📋</span> Sales History
       </a>
       {% endif %}
     </nav>
@@ -158,11 +158,11 @@
         </div>
         <div style="overflow:hidden;">
           <p style="color:#e4e4e7;font-size:13px;font-weight:500;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ request.user.username }}</p>
-          <p style="color:#52525b;font-size:11px;margin:0;">{% if request.user.is_staff %}Gerente{% else %}Atendente{% endif %}</p>
+          <p style="color:#52525b;font-size:11px;margin:0;">{% if request.user.is_staff %}Manager{% else %}Attendant{% endif %}</p>
         </div>
       </div>
       <a href="/" style="width:100%;display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:#a1a1aa;font-size:13.5px;font-weight:500;text-decoration:none;transition:background 0.15s,color 0.15s;" onmouseover="this.style.background='#27272a';this.style.color='#fff'" onmouseout="this.style.background='';this.style.color='#a1a1aa'">
-        <span style="font-size:15px;width:20px;text-align:center">🚪</span> Sair
+        <span style="font-size:15px;width:20px;text-align:center">🚪</span> Exit
       </a>
     </div>
   </aside>

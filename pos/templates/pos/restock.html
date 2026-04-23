@@ -1,9 +1,9 @@
 {% extends "pos/base.html" %}
 {% load static %}
-{% block title %}Reposição de Stock{% endblock %}
+{% block title %}Restock{% endblock %}
 {% block nav_restock %}active{% endblock %}
 {% block nav_adjustments %}{% endblock %}
-{% block page_title %}Reposição de Stock{% endblock %}
+{% block page_title %}Restock{% endblock %}
 
 {% block content %}
 <div class="space-y-4">
@@ -12,31 +12,31 @@
   <div class="flex gap-2">
     <button onclick="switchTab('restock')" id="tabRestock"
       class="px-4 py-2 rounded-lg text-sm font-medium bg-purple-600 text-white transition-colors">
-      📥 Repor Stock
+      📥 Restock
     </button>
     <button onclick="switchTab('adjust')" id="tabAdjust"
       class="px-4 py-2 rounded-lg text-sm font-medium bg-white border text-gray-600 hover:bg-gray-50 transition-colors">
-      ➖ Ajuste de Stock
+      ➖ Stock Adjustment
     </button>
   </div>
 
   <!-- RESTOCK TAB -->
   <div id="panelRestock" class="space-y-4">
     <div class="bg-white rounded-xl border shadow-sm p-4 flex flex-wrap gap-3 items-center">
-      <input id="restockSearch" type="text" placeholder="Filtrar por nome ou SKU…"
+      <input id="restockSearch" type="text" placeholder="Filter by name or SKU…"
         class="flex-1 min-w-48 p-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
       <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
         <input type="checkbox" id="showLowOnly" class="w-4 h-4 accent-purple-600" />
-        Mostrar apenas stock baixo
+        Show low stock only
       </label>
       <span id="restockCount" class="text-sm text-gray-400"></span>
     </div>
 
     <div id="changeSummary" class="hidden bg-purple-50 border border-purple-200 rounded-xl p-4 flex items-center justify-between">
-      <p class="text-sm text-purple-700 font-medium">📦 <span id="changeCount">0</span> produtos alterados</p>
+      <p class="text-sm text-purple-700 font-medium">📦 <span id="changeCount">0</span> products changed</p>
       <div class="flex gap-2">
-        <button onclick="resetAll()" class="text-sm px-3 py-1.5 border border-purple-300 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors">Resetar</button>
-        <button onclick="saveAll()" class="text-sm px-4 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">💾 Guardar tudo</button>
+        <button onclick="resetAll()" class="text-sm px-3 py-1.5 border border-purple-300 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors">Reset</button>
+        <button onclick="saveAll()" class="text-sm px-4 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">💾 Save all</button>
       </div>
     </div>
 
@@ -44,19 +44,19 @@
       <table class="w-full text-sm">
         <thead class="bg-gray-50 border-b">
           <tr>
-            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Produto</th>
+            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Product</th>
             <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">SKU</th>
-            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">Tamanho</th>
-            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">Cor</th>
-            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Stock actual</th>
-            <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Adicionar</th>
-            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Novo total</th>
+            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">Size</th>
+            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">Color</th>
+            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Current stock</th>
+            <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Add</th>
+            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">New total</th>
           </tr>
         </thead>
         <tbody id="restockTable" class="divide-y divide-gray-50"></tbody>
       </table>
       <div id="restockEmpty" class="hidden text-center py-12 text-gray-400">
-        <p class="text-3xl mb-2">📦</p><p>Nenhum produto encontrado.</p>
+        <p class="text-3xl mb-2">📦</p><p>No products found.</p>
       </div>
     </div>
   </div>
@@ -65,7 +65,7 @@
   <div id="panelAdjust" class="space-y-4 hidden">
 
     <div class="bg-white rounded-xl border shadow-sm p-4 flex flex-wrap gap-3 items-center justify-between">
-      <input id="adjustSearch" type="text" placeholder="Filtrar por nome ou SKU…"
+      <input id="adjustSearch" type="text" placeholder="Filter by name or SKU…"
         class="flex-1 min-w-48 p-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-300" />
       <span id="adjustCount" class="text-sm text-gray-400"></span>
     </div>
@@ -74,28 +74,28 @@
       <table class="w-full text-sm">
         <thead class="bg-gray-50 border-b">
           <tr>
-            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Produto</th>
+            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Product</th>
             <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">SKU</th>
-            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">Tam.</th>
-            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">Cor</th>
-            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Stock actual</th>
-            <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Remover</th>
-            <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Motivo</th>
-            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Novo total</th>
+            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">Size</th>
+            <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">Color</th>
+            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Current stock</th>
+            <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Remove</th>
+            <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Reason</th>
+            <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">New total</th>
           </tr>
         </thead>
         <tbody id="adjustTable" class="divide-y divide-gray-50"></tbody>
       </table>
       <div id="adjustEmpty" class="hidden text-center py-12 text-gray-400">
-        <p class="text-3xl mb-2">📦</p><p>Nenhum produto encontrado.</p>
+        <p class="text-3xl mb-2">📦</p><p>No products found.</p>
       </div>
     </div>
 
     <div class="flex justify-between items-center bg-red-50 border border-red-200 rounded-xl p-4">
-      <p class="text-sm text-red-700 font-medium">➖ <span id="adjustChangeCount">0</span> produtos a ajustar</p>
+      <p class="text-sm text-red-700 font-medium">➖ <span id="adjustChangeCount">0</span> products to adjust</p>
       <div class="flex gap-2">
-        <button onclick="resetAdjust()" class="text-sm px-3 py-1.5 border border-red-300 text-red-600 rounded-lg hover:bg-red-100 transition-colors">Resetar</button>
-        <button onclick="saveAdjust()" class="text-sm px-4 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">💾 Aplicar ajustes</button>
+        <button onclick="resetAdjust()" class="text-sm px-3 py-1.5 border border-red-300 text-red-600 rounded-lg hover:bg-red-100 transition-colors">Reset</button>
+        <button onclick="saveAdjust()" class="text-sm px-4 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">💾 Apply adjustments</button>
       </div>
     </div>
 
@@ -112,7 +112,7 @@
 let allProducts = [];
 let changes = {};
 let adjustments = {};
-const REASONS = ["Dano", "Perda", "Roubo", "Outro"];
+const REASONS = ["Damage", "Loss", "Theft", "Other"];
 
 function switchTab(tab) {
   document.querySelector("#panelRestock").classList.toggle("hidden", tab !== "restock");
@@ -137,7 +137,7 @@ function renderTable() {
     const matchL = !lowOnly || p.stock <= 5;
     return matchQ && matchL;
   });
-  document.querySelector("#restockCount").textContent = `${filtered.length} produtos`;
+  document.querySelector("#restockCount").textContent = `${filtered.length} products`;
   const tbody = document.querySelector("#restockTable");
   tbody.innerHTML = "";
   if (!filtered.length) { document.querySelector("#restockEmpty").classList.remove("hidden"); return; }
@@ -153,7 +153,7 @@ function renderTable() {
       <td class="px-4 py-3 font-mono text-xs text-gray-400 hidden sm:table-cell">${escHtml(p.sku)}</td>
       <td class="px-4 py-3 text-gray-500 hidden md:table-cell">${escHtml(p.size||"–")}</td>
       <td class="px-4 py-3 text-gray-500 hidden md:table-cell">${escHtml(p.color||"–")}</td>
-      <td class="px-4 py-3 text-right font-bold ${isOut?"text-red-500":isLow?"text-yellow-600":"text-gray-700"}">${isOut?"Esgotado":p.stock}${isLow&&!isOut?" ⚠️":""}</td>
+      <td class="px-4 py-3 text-right font-bold ${isOut?"text-red-500":isLow?"text-yellow-600":"text-gray-700"}">${isOut?"Out of stock":p.stock}${isLow&&!isOut?" ⚠️":""}</td>
       <td class="px-4 py-3">
         <div class="flex items-center justify-center gap-2">
           <button onclick="adjust(${p.id},-1)" class="w-8 h-8 rounded-lg border bg-gray-50 hover:bg-gray-100 font-bold text-gray-600 flex items-center justify-center">−</button>
@@ -187,7 +187,7 @@ function resetAll() { changes = {}; renderTable(); }
 
 async function saveAll() {
   const ids = Object.keys(changes);
-  if (!ids.length) { showToast("Nenhuma alteração para guardar.", "red"); return; }
+  if (!ids.length) { showToast("No changes to save.", "red"); return; }
 
   const items = ids.map(id => ({ variant_id: parseInt(id), quantity: changes[id] }));
   const res = await fetch(`/${SLUG}/api/restock`, {
@@ -196,23 +196,23 @@ async function saveAll() {
     body: JSON.stringify({ items }),
   });
   const data = await res.json();
-  if (!res.ok || data.error) { showToast("Erro ao guardar reposição.", "red"); return; }
+  if (!res.ok || data.error) { showToast("Error saving restock.", "red"); return; }
 
   changes = {};
   await loadProducts();
-  showToast(`✓ ${data.saved} produto${data.saved!==1?"s":""} actualizado${data.saved!==1?"s":""}!`, "green");
+  showToast(`✓ ${data.saved} product${data.saved!==1?"s":""} updated!`, "green");
 }
 
 function renderAdjustTable() {
   const query = document.querySelector("#adjustSearch").value.toLowerCase();
   let filtered = allProducts.filter(p => !query || p.product_name.toLowerCase().includes(query) || p.sku.toLowerCase().includes(query));
-  document.querySelector("#adjustCount").textContent = `${filtered.length} produtos`;
+  document.querySelector("#adjustCount").textContent = `${filtered.length} products`;
   const tbody = document.querySelector("#adjustTable");
   tbody.innerHTML = "";
   if (!filtered.length) { document.querySelector("#adjustEmpty").classList.remove("hidden"); return; }
   document.querySelector("#adjustEmpty").classList.add("hidden");
   filtered.forEach(p => {
-    const adj = adjustments[p.id] || { qty: 0, reason: "Outro" };
+    const adj = adjustments[p.id] || { qty: 0, reason: "Other" };
     const hasChange = adj.qty > 0;
     const newTotal = Math.max(0, p.stock - adj.qty);
     const tr = document.createElement("tr");
@@ -222,7 +222,7 @@ function renderAdjustTable() {
       <td class="px-4 py-3 font-mono text-xs text-gray-400 hidden sm:table-cell">${escHtml(p.sku)}</td>
       <td class="px-4 py-3 text-gray-500 hidden md:table-cell">${escHtml(p.size||"–")}</td>
       <td class="px-4 py-3 text-gray-500 hidden md:table-cell">${escHtml(p.color||"–")}</td>
-      <td class="px-4 py-3 text-right font-bold ${p.stock===0?"text-red-500":"text-gray-700"}">${p.stock===0?"Esgotado":p.stock}</td>
+      <td class="px-4 py-3 text-right font-bold ${p.stock===0?"text-red-500":"text-gray-700"}">${p.stock===0?"Out of stock":p.stock}</td>
       <td class="px-4 py-3">
         <div class="flex items-center justify-center gap-2">
           <button onclick="adjDelta(${p.id},-1)" class="w-8 h-8 rounded-lg border bg-gray-50 hover:bg-gray-100 font-bold text-gray-600 flex items-center justify-center">−</button>
@@ -245,7 +245,7 @@ function renderAdjustTable() {
 function adjDelta(id, delta) {
   const p = allProducts.find(x => x.id === parseInt(id));
   if (!p) return;
-  if (!adjustments[id]) adjustments[id] = { qty: 0, reason: "Outro" };
+  if (!adjustments[id]) adjustments[id] = { qty: 0, reason: "Other" };
   adjustments[id].qty = Math.max(0, Math.min(p.stock, adjustments[id].qty + delta));
   if (!adjustments[id].qty) delete adjustments[id];
   renderAdjustTable();
@@ -254,7 +254,7 @@ function setAdj(id, val) {
   const p = allProducts.find(x => x.id === parseInt(id));
   if (!p) return;
   const n = Math.max(0, Math.min(p.stock, parseInt(val)||0));
-  if (!adjustments[id]) adjustments[id] = { qty: 0, reason: "Outro" };
+  if (!adjustments[id]) adjustments[id] = { qty: 0, reason: "Other" };
   adjustments[id].qty = n;
   if (!n) delete adjustments[id];
   updateAdjustSummary();
@@ -271,7 +271,7 @@ function resetAdjust() { adjustments = {}; renderAdjustTable(); }
 
 async function saveAdjust() {
   const ids = Object.keys(adjustments);
-  if (!ids.length) { showToast("Nenhum ajuste para aplicar.", "red"); return; }
+  if (!ids.length) { showToast("No adjustments to apply.", "red"); return; }
 
   const items = ids.map(id => ({
     variant_id: parseInt(id),
@@ -287,12 +287,12 @@ async function saveAdjust() {
   const data = await res.json();
 
   if (!res.ok || data.error) {
-    showToast("Erro ao guardar ajustes.", "red"); return;
+    showToast("Error saving adjustments.", "red"); return;
   }
 
   adjustments = {};
   await loadProducts();
-  showToast(`✓ ${data.saved} ajuste${data.saved!==1?"s":""} aplicado${data.saved!==1?"s":""}!`, "green");
+  showToast(`✓ ${data.saved} adjustment${data.saved!==1?"s":""} applied!`, "green");
 }
 
 function showToast(msg, color="green") {

@@ -1,18 +1,18 @@
 {% extends "pos/base.html" %}
 {% load static %}
-{% block title %}Catálogo{% endblock %}
+{% block title %}Catalogue{% endblock %}
 {% block nav_catalogue %}nav-active{% endblock %}
-{% block page_title %}Catálogo de produtos{% endblock %}
+{% block page_title %}Product Catalogue{% endblock %}
 
 {% block header_actions %}
-  <button onclick="openAddModal()" class="text-sm px-4 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">+ Novo produto</button>
+  <button onclick="openAddModal()" class="text-sm px-4 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">+ New product</button>
 {% endblock %}
 
 {% block content %}
 <div class="space-y-4">
   <!-- Search + filter bar -->
   <div class="bg-white rounded-xl border shadow-sm p-4 flex flex-wrap gap-3 items-center">
-    <input id="catSearch" type="text" placeholder="Procurar pelo nome ou SKU…"
+    <input id="catSearch" type="text" placeholder="Search by name or SKU…"
       class="flex-1 min-w-48 p-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
     <span class="text-sm text-gray-400" id="catCount"></span>
   </div>
@@ -23,18 +23,18 @@
       <thead class="bg-gray-50 border-b">
         <tr>
           <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs uppercase">SKU</th>
-          <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs uppercase">Nome</th>
-          <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs uppercase hidden sm:table-cell">Tamanho</th>
-          <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs uppercase hidden sm:table-cell">Cor</th>
-          <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs uppercase hidden md:table-cell">Categoria</th>
-          <th class="text-right px-4 py-3 font-semibold text-gray-500 text-xs uppercase">Preço MZN</th>
+          <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs uppercase">Name</th>
+          <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs uppercase hidden sm:table-cell">Size</th>
+          <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs uppercase hidden sm:table-cell">Color</th>
+          <th class="text-left px-4 py-3 font-semibold text-gray-500 text-xs uppercase hidden md:table-cell">Category</th>
+          <th class="text-right px-4 py-3 font-semibold text-gray-500 text-xs uppercase">Price MZN</th>
           <th class="text-right px-4 py-3 font-semibold text-gray-500 text-xs uppercase">Stock</th>
         </tr>
       </thead>
       <tbody id="catTable" class="divide-y divide-gray-50"></tbody>
     </table>
     <div id="catEmpty" class="hidden text-center py-12 text-gray-400">
-      <p class="text-3xl mb-2">📦</p><p>Nenhum produto encontrado.</p>
+      <p class="text-3xl mb-2">📦</p><p>No products found.</p>
     </div>
   </div>
 </div>
@@ -42,23 +42,23 @@
 <!-- Edit Modal -->
 <div id="editModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
   <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md space-y-4">
-    <h3 class="font-bold text-gray-800 text-lg">Editar variante</h3>
+    <h3 class="font-bold text-gray-800 text-lg">Edit variant</h3>
     <input type="hidden" id="editId" />
     <div class="grid grid-cols-2 gap-3">
       <div class="col-span-2">
-        <label class="text-xs text-gray-500 font-medium">Nome do produto</label>
+        <label class="text-xs text-gray-500 font-medium">Product name</label>
         <input id="editName" class="w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none" />
       </div>
       <div>
-        <label class="text-xs text-gray-500 font-medium">Tamanho</label>
+        <label class="text-xs text-gray-500 font-medium">Size</label>
         <input id="editSize" class="w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none" />
       </div>
       <div>
-        <label class="text-xs text-gray-500 font-medium">Cor</label>
+        <label class="text-xs text-gray-500 font-medium">Color</label>
         <input id="editColor" class="w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none" />
       </div>
       <div>
-        <label class="text-xs text-gray-500 font-medium">Preço (MZN)</label>
+        <label class="text-xs text-gray-500 font-medium">Price (MZN)</label>
         <input id="editPrice" type="number" class="w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none" />
       </div>
       <div>
@@ -66,13 +66,13 @@
         <input id="editStock" type="number" class="w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none" />
       </div>
       <div class="col-span-2">
-        <label class="text-xs text-gray-500 font-medium">Categoria</label>
+        <label class="text-xs text-gray-500 font-medium">Category</label>
         <input id="editCategory" class="w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none" />
       </div>
     </div>
     <div class="flex gap-3 pt-2">
-      <button onclick="saveEdit()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl font-medium transition-colors">Guardar</button>
-      <button onclick="closeModal('editModal')" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-xl font-medium transition-colors">Cancelar</button>
+      <button onclick="saveEdit()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl font-medium transition-colors">Save</button>
+      <button onclick="closeModal('editModal')" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-xl font-medium transition-colors">Cancel</button>
     </div>
   </div>
 </div>
@@ -80,37 +80,37 @@
 <!-- Add Modal -->
 <div id="addModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
   <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md space-y-4">
-    <h3 class="font-bold text-gray-800 text-lg">Adicionar variante</h3>
+    <h3 class="font-bold text-gray-800 text-lg">Add variant</h3>
     <div class="grid grid-cols-2 gap-3">
       <div class="col-span-2">
-        <label class="text-xs text-gray-500 font-medium">Nome do produto *</label>
-        <input id="addName" placeholder="Ex: Camiseta Básica" class="w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none" />
+        <label class="text-xs text-gray-500 font-medium">Product name *</label>
+        <input id="addName" placeholder="E.g. Basic T-Shirt" class="w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none" />
       </div>
       <!-- SKU is auto-generated server-side — hidden from user -->
       <div>
-        <label class="text-xs text-gray-500 font-medium">Tamanho</label>
-        <input id="addSize" placeholder="M, L, 160…" class="w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none" />
+        <label class="text-xs text-gray-500 font-medium">Size</label>
+        <input id="addSize" placeholder="M, L, 42…" class="w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none" />
       </div>
       <div>
-        <label class="text-xs text-gray-500 font-medium">Cor</label>
-        <input id="addColor" placeholder="Azul, Preto…" class="w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none" />
+        <label class="text-xs text-gray-500 font-medium">Color</label>
+        <input id="addColor" placeholder="Blue, Black…" class="w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none" />
       </div>
       <div>
-        <label class="text-xs text-gray-500 font-medium">Preço MZN *</label>
+        <label class="text-xs text-gray-500 font-medium">Price MZN *</label>
         <input id="addPrice" type="number" placeholder="0" class="w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none" />
       </div>
       <div>
-        <label class="text-xs text-gray-500 font-medium">Stock inicial</label>
+        <label class="text-xs text-gray-500 font-medium">Initial stock</label>
         <input id="addStock" type="number" placeholder="0" class="w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none" />
       </div>
       <div class="col-span-2">
-        <label class="text-xs text-gray-500 font-medium">Categoria</label>
-        <input id="addCategory" placeholder="Vestuário, Calçado…" class="w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none" />
+        <label class="text-xs text-gray-500 font-medium">Category</label>
+        <input id="addCategory" placeholder="Clothing, Footwear…" class="w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none" />
       </div>
     </div>
     <div class="flex gap-3 pt-2">
-      <button onclick="saveAdd()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl font-medium transition-colors">Adicionar</button>
-      <button onclick="closeModal('addModal')" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-xl font-medium transition-colors">Cancelar</button>
+      <button onclick="saveAdd()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-xl font-medium transition-colors">Add</button>
+      <button onclick="closeModal('addModal')" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-xl font-medium transition-colors">Cancel</button>
     </div>
   </div>
 </div>
@@ -135,7 +135,7 @@ function renderTable(query="") {
     !q || p.product_name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q) || (p.category||"").toLowerCase().includes(q)
   );
 
-  document.querySelector("#catCount").textContent = `Exibindo ${filtered.length} de ${allProducts.length}`;
+  document.querySelector("#catCount").textContent = `Showing ${filtered.length} of ${allProducts.length}`;
   const tbody = document.querySelector("#catTable");
   tbody.innerHTML = "";
 
@@ -204,13 +204,13 @@ async function saveAdd() {
   };
   const res = await fetch(`/${SLUG}/api/catalogue/add`, { method:"POST", headers: csrfHeaders(), body:JSON.stringify(payload) });
   const data = await res.json();
-  if (data.error) { alert("Erro: " + data.error); return; }
+  if (data.error) { alert("Error: " + data.error); return; }
   closeModal("addModal");
   loadCatalogue();
 }
 
 async function deleteVariant(id) {
-  if (!confirm("Remover este produto do catálogo?")) return;
+  if (!confirm("Remove this product from the catalogue?")) return;
   await fetch(`/${SLUG}/api/catalogue/${id}`, { method:"DELETE", headers: { 'X-CSRFToken': csrfToken() } });
   loadCatalogue(document.querySelector("#catSearch").value);
 }

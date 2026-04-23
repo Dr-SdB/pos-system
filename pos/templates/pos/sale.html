@@ -1,8 +1,8 @@
 {% extends "pos/base.html" %}
 {% load static %}
-{% block title %}Vendas{% endblock %}
+{% block title %}New Sale{% endblock %}
 {% block nav_sale %}nav-active{% endblock %}
-{% block page_title %}Registar Venda{% endblock %}
+{% block page_title %}New Sale{% endblock %}
 
 {% block content %}
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -10,9 +10,9 @@
   <!-- Left: Product search -->
   <div class="space-y-4">
     <div class="bg-white rounded-xl border shadow-sm p-4">
-      <p class="font-semibold text-gray-700 mb-3">Produto</p>
+      <p class="font-semibold text-gray-700 mb-3">Product</p>
       <div class="relative">
-        <input id="saleSearch" type="text" placeholder="Procurar pelo nome ou SKU…"
+        <input id="saleSearch" type="text" placeholder="Search by name or SKU…"
           class="w-full p-3 pr-10 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
         <span class="absolute right-3 top-3 text-gray-400">🔍</span>
       </div>
@@ -21,32 +21,32 @@
 
     <!-- Sale details -->
     <div class="bg-white rounded-xl border shadow-sm p-4 space-y-3">
-      <p class="font-semibold text-gray-700">🧾 Detalhes da Venda</p>
+      <p class="font-semibold text-gray-700">🧾 Sale Details</p>
 
       <div>
-        <p class="text-xs text-gray-500 font-medium mb-2">Método de pagamento</p>
+        <p class="text-xs text-gray-500 font-medium mb-2">Payment method</p>
         <div class="flex flex-wrap gap-2" id="paymentBtns">
-          <button data-pay="Dinheiro" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-green-100 text-green-700 ring-2 ring-green-400">Dinheiro</button>
+          <button data-pay="Cash" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-green-100 text-green-700 ring-2 ring-green-400">Cash</button>
           <button data-pay="M-Pesa" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-blue-100 text-blue-700">M-Pesa</button>
-          <button data-pay="eMola" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-yellow-100 text-yellow-700">eMola</button>
+          <button data-pay="E-Mola" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-yellow-100 text-yellow-700">E-Mola</button>
           <button data-pay="POS" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-blue-100 text-blue-700">POS</button>
-          <button data-pay="Cartao" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-purple-100 text-purple-700">Cartão</button>
-          <button data-pay="Transferencia" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-gray-100 text-gray-600">Transferência</button>
+          <button data-pay="Card" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-purple-100 text-purple-700">Card</button>
+          <button data-pay="Transfer" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-gray-100 text-gray-600">Transfer</button>
         </div>
-        <input type="hidden" id="selectedPayment" value="Dinheiro" />
+        <input type="hidden" id="selectedPayment" value="Cash" />
       </div>
 
       <div>
-        <label class="text-xs text-gray-500 font-medium">Local de venda</label>
+        <label class="text-xs text-gray-500 font-medium">Sale location</label>
         <select id="saleLocation" class="w-full mt-1 p-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 bg-white">
-          <option value="Loja">Loja</option>
+          <option value="Store">Store</option>
           <option value="Online">Online</option>
         </select>
       </div>
 
       <div>
-        <label class="text-xs text-gray-500 font-medium">Dados do cliente (opcional)</label>
-        <input id="customerName" type="text" placeholder="Nome, contacto e outras informações do cliente"
+        <label class="text-xs text-gray-500 font-medium">Customer details (optional)</label>
+        <input id="customerName" type="text" placeholder="Name, contact and other customer information"
           class="w-full mt-1 p-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
       </div>
     </div>
@@ -57,12 +57,12 @@
     <div class="bg-white rounded-xl border shadow-sm p-4">
       <div class="flex items-center gap-2 mb-4">
         <span>🛒</span>
-        <p class="font-semibold text-gray-700">Carrinho</p>
+        <p class="font-semibold text-gray-700">Cart</p>
       </div>
       <div id="cartItems" class="space-y-3 min-h-24">
         <div class="flex flex-col items-center justify-center h-24 text-gray-400">
           <span class="text-3xl">🛒</span>
-          <p class="text-sm mt-1">Seleccione um produto para continuar</p>
+          <p class="text-sm mt-1">Select a product to continue</p>
         </div>
       </div>
     </div>
@@ -70,32 +70,32 @@
     <!-- Totals -->
     <div class="bg-white rounded-xl border shadow-sm p-4 space-y-3">
       <div class="flex justify-between text-sm text-gray-500">
-        <span>Subtotal</span><span id="cartSubtotal">0,00 MZN</span>
+        <span>Subtotal</span><span id="cartSubtotal">0.00 MZN</span>
       </div>
       <div id="discountRow" class="hidden flex justify-between text-sm text-red-500">
-        <span>Desconto artigos</span><span>−<span id="cartDiscount">0,00</span> MZN</span>
+        <span>Item discounts</span><span>−<span id="cartDiscount">0.00</span> MZN</span>
       </div>
       <div class="flex items-center gap-2">
-        <label class="text-xs text-gray-500 whitespace-nowrap">Desconto geral (MZN)</label>
+        <label class="text-xs text-gray-500 whitespace-nowrap">General discount (MZN)</label>
         <input id="flatDiscount" type="number" min="0" step="1" placeholder="0"
           class="w-full p-2 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" value="0" />
       </div>
       <div id="flatDiscountRow" class="hidden flex justify-between text-sm text-red-500">
-        <span>Desconto geral</span><span>−<span id="cartFlatDiscount">0,00</span> MZN</span>
+        <span>General discount</span><span>−<span id="cartFlatDiscount">0.00</span> MZN</span>
       </div>
       <div class="flex justify-between font-bold text-base border-t pt-3">
-        <span>Total</span><span id="cartTotal">0,00 MZN</span>
+        <span>Total</span><span id="cartTotal">0.00 MZN</span>
       </div>
       <div>
-        <label class="text-xs text-gray-500">Montante recebido (MZN)</label>
+        <label class="text-xs text-gray-500">Amount received (MZN)</label>
         <input id="amountPaid" type="number" min="0" step="1" placeholder="0"
           class="w-full mt-1 p-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" value="0" />
         <div class="flex justify-between text-sm text-green-600 font-medium mt-1.5">
-          <span>Troco</span><span id="changeDisplay">0,00 MZN</span>
+          <span>Change</span><span id="changeDisplay">0.00 MZN</span>
         </div>
       </div>
       <button id="btnCheckout" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition-colors">
-        Registar Venda
+        Complete Sale
       </button>
     </div>
   </div>
@@ -105,12 +105,12 @@
 <div id="receiptModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
   <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center space-y-4">
     <div class="text-5xl">✅</div>
-    <h2 class="text-2xl font-bold">Venda Registada!</h2>
+    <h2 class="text-2xl font-bold">Sale Completed!</h2>
     <p id="receiptSub" class="text-gray-500 text-sm"></p>
     <div id="receiptBody" class="bg-gray-50 rounded-xl p-4 space-y-1 text-sm text-left"></div>
-    <button onclick="document.querySelector('#receiptModal').classList.add('hidden')" 
+    <button onclick="document.querySelector('#receiptModal').classList.add('hidden')"
       class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-xl">
-      Nova Venda
+      New Sale
     </button>
   </div>
 </div>
@@ -147,7 +147,7 @@ async function searchProducts(q) {
   _searchResults = data.results;
   const container = document.querySelector("#searchResults");
   if (!data.results.length) {
-    container.innerHTML = "<p class='text-sm text-gray-400 text-center py-3'>Nenhum resultado</p>";
+    container.innerHTML = "<p class='text-sm text-gray-400 text-center py-3'>No results</p>";
     return;
   }
   container.innerHTML = data.results.map((p, i) => `
@@ -159,7 +159,7 @@ async function searchProducts(q) {
       </div>
       <div class="text-right">
         <p class="font-bold text-sm text-gray-800">${mzn(p.price)}</p>
-        <p class="text-xs ${p.stock>0?'text-green-600':'text-red-500'}">${p.stock>0?p.stock+' em stock':'Esgotado'}</p>
+        <p class="text-xs ${p.stock>0?'text-green-600':'text-red-500'}">${p.stock>0?p.stock+' in stock':'Out of stock'}</p>
       </div>
     </div>
   `).join("");
@@ -183,7 +183,7 @@ function renderCart() {
 
   if (!cart.length) {
     container.innerHTML = `<div class="flex flex-col items-center justify-center h-24 text-gray-400">
-      <span class="text-3xl">🛒</span><p class="text-sm mt-1">Seleccione um produto para continuar</p>
+      <span class="text-3xl">🛒</span><p class="text-sm mt-1">Select a product to continue</p>
     </div>`;
     updateTotals(0,0,0);
     return;
@@ -212,7 +212,7 @@ function renderCart() {
             <button onclick="changeQty(${i},1)" class="px-2 py-1 bg-gray-50 hover:bg-gray-100">+</button>
           </div>
           <div class="flex items-center gap-1 text-xs text-gray-500">
-            <span>Desc.</span>
+            <span>Disc.</span>
             <input type="number" min="0" max="100" value="${item.discount_percent||0}"
               onchange="setDiscount(${i}, this.value)"
               class="w-12 p-1 border rounded text-center text-xs focus:outline-none focus:ring-1 focus:ring-purple-300" />
@@ -279,7 +279,7 @@ async function checkout() {
   if (!cart.length) return;
 
   const btn = document.querySelector("#btnCheckout");
-  btn.disabled = true; btn.textContent = "A processar…";
+  btn.disabled = true; btn.textContent = "Processing…";
 
   const payload = {
     payment_method: document.querySelector("#selectedPayment").value,
@@ -295,24 +295,24 @@ async function checkout() {
     const data = await res.json();
 
     if (!res.ok || data.error) {
-      alert("Erro: " + (data.error || "Erro desconhecido")); return;
+      alert("Error: " + (data.error || "Unknown error")); return;
     }
 
     clearCart();
     document.querySelector("#flatDiscount").value = 0;
     renderCart();
-    document.querySelector("#receiptSub").textContent = `Venda #${data.sale_id} · ${data.payment_method}`;
+    document.querySelector("#receiptSub").textContent = `Sale #${data.sale_id} · ${data.payment_method}`;
     document.querySelector("#receiptBody").innerHTML = `
       <div class="flex justify-between"><span class="text-gray-500">Subtotal</span><span>${mzn(data.subtotal)}</span></div>
-      ${data.discount_total > 0 ? `<div class="flex justify-between text-red-500"><span>Desconto artigos</span><span>−${mzn(data.discount_total)}</span></div>` : ""}
-      ${data.flat_discount > 0 ? `<div class="flex justify-between text-red-500"><span>Desconto geral</span><span>−${mzn(data.flat_discount)}</span></div>` : ""}
+      ${data.discount_total > 0 ? `<div class="flex justify-between text-red-500"><span>Item discounts</span><span>−${mzn(data.discount_total)}</span></div>` : ""}
+      ${data.flat_discount > 0 ? `<div class="flex justify-between text-red-500"><span>General discount</span><span>−${mzn(data.flat_discount)}</span></div>` : ""}
       <div class="flex justify-between font-bold border-t pt-1"><span>Total</span><span>${mzn(data.total)}</span></div>
-      ${data.amount_paid > 0 ? `<div class="flex justify-between text-gray-500"><span>Recebido</span><span>${mzn(data.amount_paid)}</span></div>` : ""}
-      ${data.change > 0 ? `<div class="flex justify-between text-green-600 font-medium"><span>Troco</span><span>${mzn(data.change)}</span></div>` : ""}
+      ${data.amount_paid > 0 ? `<div class="flex justify-between text-gray-500"><span>Received</span><span>${mzn(data.amount_paid)}</span></div>` : ""}
+      ${data.change > 0 ? `<div class="flex justify-between text-green-600 font-medium"><span>Change</span><span>${mzn(data.change)}</span></div>` : ""}
     `;
     document.querySelector("#receiptModal").classList.remove("hidden");
-  } catch { alert("Erro de rede. Tente novamente."); }
-  finally { btn.disabled = false; btn.textContent = "Registar Venda"; }
+  } catch { alert("Network error. Please try again."); }
+  finally { btn.disabled = false; btn.textContent = "Complete Sale"; }
 }
 
 document.querySelector("#btnCheckout").addEventListener("click", checkout);

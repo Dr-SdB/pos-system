@@ -1,24 +1,24 @@
 {% extends "pos/base.html" %}
 {% load static %}
-{% block title %}Pesquisa{% endblock %}
-{% block page_title %}Pesquisa de Produtos{% endblock %}
+{% block title %}Search{% endblock %}
+{% block page_title %}Product Search{% endblock %}
 
 {% block content %}
 <div class="space-y-4">
-  <input type="text" id="searchInput" placeholder="Pesquisar produtos por nome ou SKU…"
+  <input type="text" id="searchInput" placeholder="Search products by name or SKU…"
     class="w-full p-4 text-base border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white shadow-sm" />
 
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
     <select id="filterSize" class="p-3 border rounded-xl bg-white text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none">
-      <option value="all">Todos os Tamanhos</option>
+      <option value="all">All Sizes</option>
       <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option>
     </select>
     <select id="filterColor" class="p-3 border rounded-xl bg-white text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none">
-      <option value="all">Todas as Cores</option>
-      <option>Branco</option><option>Preto</option><option>Azul</option><option>Vermelho</option>
+      <option value="all">All Colors</option>
+      <option>White</option><option>Black</option><option>Blue</option><option>Red</option><option>Grey</option><option>Brown</option><option>Navy</option>
     </select>
     <select id="filterCategory" class="p-3 border rounded-xl bg-white text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none">
-      <option value="all">Todas as Categorias</option>
+      <option value="all">All Categories</option>
     </select>
   </div>
 
@@ -45,7 +45,7 @@ async function runSearch() {
   container.innerHTML = "";
 
   if (!data.results.length) {
-    container.innerHTML = "<div class='col-span-full text-center py-12 text-gray-400'><p class='text-4xl mb-2'>🔍</p><p>Nenhum produto encontrado.</p></div>";
+    container.innerHTML = "<div class='col-span-full text-center py-12 text-gray-400'><p class='text-4xl mb-2'>🔍</p><p>No products found.</p></div>";
     return;
   }
 
@@ -63,7 +63,7 @@ async function runSearch() {
       </div>
       <div class="flex items-center justify-between">
         <span class="text-xl font-bold text-gray-800">${mzn(p.price)}</span>
-        <span class="text-sm ${p.stock>0?"text-green-600":"text-red-500"}">${p.stock>0?"✓ "+p.stock+" em stock":"✗ Esgotado"}</span>
+        <span class="text-sm ${p.stock>0?"text-green-600":"text-red-500"}">${p.stock>0?"✓ "+p.stock+" in stock":"✗ Out of stock"}</span>
       </div>
     `;
     container.appendChild(card);

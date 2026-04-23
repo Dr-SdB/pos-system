@@ -6,11 +6,10 @@
 
 {% block header_actions %}
 <a href="/{{ request.tenant.subdomain }}/availability/"
-  class="text-sm px-3 py-1.5 border rounded-lg hover:bg-gray-50 transition-colors">Ver produtos
-  disponíveis</a>
+  class="text-sm px-3 py-1.5 border rounded-lg hover:bg-gray-50 transition-colors">View available products</a>
 <a href="/{{ request.tenant.subdomain }}/sale/"
   class="text-sm px-4 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">●
-  Registar venda</a>
+  New Sale</a>
 {% endblock %}
 
 {% block content %}
@@ -19,24 +18,24 @@
   <!-- Month selector & summary title -->
   <div class="flex items-center justify-between">
     <div>
-      <p class="text-xs text-gray-400 uppercase tracking-wide">Resumo de</p>
+      <p class="text-xs text-gray-400 uppercase tracking-wide">Summary for</p>
       <h2 class="text-xl font-bold text-gray-800" id="monthLabel">—</h2>
     </div>
     <div class="flex items-center gap-2">
       <select id="selMonth"
         class="p-2 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-300">
-        <option value="1">Janeiro</option>
-        <option value="2">Fevereiro</option>
-        <option value="3">Março</option>
-        <option value="4">Abril</option>
-        <option value="5">Maio</option>
-        <option value="6">Junho</option>
-        <option value="7">Julho</option>
-        <option value="8">Agosto</option>
-        <option value="9">Setembro</option>
-        <option value="10">Outubro</option>
-        <option value="11">Novembro</option>
-        <option value="12">Dezembro</option>
+        <option value="1">January</option>
+        <option value="2">February</option>
+        <option value="3">March</option>
+        <option value="4">April</option>
+        <option value="5">May</option>
+        <option value="6">June</option>
+        <option value="7">July</option>
+        <option value="8">August</option>
+        <option value="9">September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
       </select>
       <select id="selYear"
         class="p-2 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-300">
@@ -50,27 +49,27 @@
   <div class="bg-white rounded-2xl border shadow-sm p-5">
     <div class="flex items-start justify-between mb-4">
       <div>
-        <p class="text-sm text-gray-400 font-medium">Distribuição de Vendas</p>
-        <p class="text-xs text-gray-400">Resumo geral das vendas geradas na plataforma</p>
+        <p class="text-sm text-gray-400 font-medium">Sales Overview</p>
+        <p class="text-xs text-gray-400">General summary of sales generated on the platform</p>
       </div>
     </div>
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 border-t pt-4">
       <div>
         <p class="text-2xl font-bold text-gray-800" id="kpiRevenue">—</p>
-        <p class="text-xs text-gray-400 mt-0.5">Receita</p>
+        <p class="text-xs text-gray-400 mt-0.5">Revenue</p>
         <span id="kpiChange" class="text-xs font-medium mt-1 inline-block px-2 py-0.5 rounded-full"></span>
       </div>
       <div>
         <p class="text-2xl font-bold text-gray-800" id="kpiSales">—</p>
-        <p class="text-xs text-gray-400 mt-0.5">Unidades vendidas</p>
+        <p class="text-xs text-gray-400 mt-0.5">Units sold</p>
       </div>
       <div>
         <p class="text-2xl font-bold text-gray-800" id="kpiPayment">—</p>
-        <p class="text-xs text-gray-400 mt-0.5">Meio de pagamento</p>
+        <p class="text-xs text-gray-400 mt-0.5">Top payment method</p>
       </div>
       <div>
         <p class="text-2xl font-bold text-gray-800" id="kpiInventory">—</p>
-        <p class="text-xs text-gray-400 mt-0.5">Unidades no inventário</p>
+        <p class="text-xs text-gray-400 mt-0.5">Units in inventory</p>
       </div>
     </div>
     <!-- Chart -->
@@ -79,12 +78,12 @@
     </div>
   </div>
 
-  <!-- Row 2: Funcionário destaque + Low stock + Destaques -->
+  <!-- Row 2: Top Employee + Low stock + Highlights -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-    <!-- Funcionário destaque -->
+    <!-- Top Employee -->
     <div class="bg-white rounded-2xl border shadow-sm p-5 space-y-3">
-      <p class="text-sm font-semibold text-gray-600">🏅 Funcionário em destaque</p>
+      <p class="text-sm font-semibold text-gray-600">🏅 Top Employee</p>
       <div id="topAttendant" class="flex flex-col justify-center h-24">
         <p class="text-gray-400 text-sm">—</p>
       </div>
@@ -93,11 +92,11 @@
     <!-- Low stock alerts -->
     <div class="bg-white rounded-2xl border shadow-sm p-5">
       <div class="flex items-center justify-between mb-3">
-        <p class="text-sm font-semibold text-gray-600">Alertas de stock baixo</p>
+        <p class="text-sm font-semibold text-gray-600">Low Stock Alerts</p>
         <span class="bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full" id="lowStockCount">0</span>
       </div>
       <div id="lowStockList" class="space-y-2 text-sm"></div>
-      <p class="text-xs text-gray-400 mt-3">Repor para evitar rupturas de stock</p>
+      <p class="text-xs text-gray-400 mt-3">Restock to avoid stockouts</p>
       <div class="mt-2">
         <div class="bg-gray-100 rounded-full h-1.5 w-full">
           <div id="stockBar" class="bg-purple-500 h-1.5 rounded-full" style="width:0%"></div>
@@ -106,12 +105,12 @@
       </div>
     </div>
 
-    <!-- Destaques (top products) -->
+    <!-- Highlights (top products) -->
     <div class="bg-white rounded-2xl border shadow-sm p-5">
-      <p class="text-sm font-semibold text-gray-600 mb-3">⭐ Destaques</p>
+      <p class="text-sm font-semibold text-gray-600 mb-3">⭐ Highlights</p>
       <div id="topProductsList" class="space-y-2 text-sm"></div>
       <a href="/{{ request.tenant.subdomain }}/history/"
-        class="text-purple-600 text-xs font-medium mt-4 inline-block hover:underline">Ver vendas →</a>
+        class="text-purple-600 text-xs font-medium mt-4 inline-block hover:underline">View sales →</a>
     </div>
 
   </div>
@@ -119,7 +118,7 @@
   <!-- Bottom row: 3 cards -->
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
     <div class="bg-white rounded-2xl border shadow-sm p-5">
-      <p class="text-sm font-semibold text-gray-600 mb-4">Meios de pagamento</p>
+      <p class="text-sm font-semibold text-gray-600 mb-4">Payment Methods</p>
       <div class="flex flex-col items-center gap-4">
         <div class="w-28 h-28 relative flex-shrink-0">
           <canvas id="paymentChart"></canvas>
@@ -129,14 +128,14 @@
     </div>
 
     <div class="bg-white rounded-2xl border shadow-sm p-5">
-      <p class="text-sm font-semibold text-gray-600 mb-4">📅 Vendas por dia da semana</p>
+      <p class="text-sm font-semibold text-gray-600 mb-4">📅 Sales by Day of Week</p>
       <div class="h-36 relative">
         <canvas id="weekdayChart"></canvas>
       </div>
     </div>
 
     <div class="bg-white rounded-2xl border shadow-sm p-5">
-      <p class="text-sm font-semibold text-gray-600 mb-4">🏆 Top produtos do mês</p>
+      <p class="text-sm font-semibold text-gray-600 mb-4">🏆 Top Products This Month</p>
       <div id="topProductsTable" class="space-y-2"></div>
     </div>
   </div>
@@ -146,8 +145,8 @@
 
 {% block scripts %}
 <script>
-  const MONTHS = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-  const PAYMENT_COLORS = { "Dinheiro": "#22c55e", "M-Pesa": "#3b82f6", "E-Mola": "#f59e0b", "eMola": "#f59e0b", "Cartao": "#8b5cf6", "Transferencia": "#64748b", "POS": "#0ea5e9" };
+  const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const PAYMENT_COLORS = { "Cash": "#22c55e", "M-Pesa": "#3b82f6", "E-Mola": "#f59e0b", "eMola": "#f59e0b", "Card": "#8b5cf6", "Transfer": "#64748b", "POS": "#0ea5e9" };
 
   let salesChartInst, paymentChartInst, weekdayChartInst;
 
@@ -161,7 +160,7 @@
     const d = await res.json();
 
     // Month label
-    document.querySelector("#monthLabel").textContent = `${MONTHS[d.month - 1]} de ${d.year}`;
+    document.querySelector("#monthLabel").textContent = `${MONTHS[d.month - 1]} ${d.year}`;
 
     // KPIs
     document.querySelector("#kpiRevenue").textContent = fmt(d.total_revenue);
@@ -183,13 +182,13 @@
       el.className = `text-xs font-medium mt-1 inline-block px-2 py-0.5 rounded-full ${chg >= 0 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"}`;
     });
 
-    // Funcionário destaque
+    // Top employee
     const ta = d.top_attendant;
     document.querySelector("#topAttendant").innerHTML = ta
       ? `<p class="text-2xl font-bold text-gray-800">${escHtml(ta.name)}</p>
          <p class="text-sm text-green-600 font-semibold mt-1">${fmt(ta.revenue)}</p>
-         <p class="text-xs text-gray-400 mt-0.5">${ta.count} venda${ta.count !== 1 ? 's' : ''}</p>`
-      : `<p class="text-gray-400 text-sm">Sem vendas registadas neste período</p>`;
+         <p class="text-xs text-gray-400 mt-0.5">${ta.count} sale${ta.count !== 1 ? 's' : ''}</p>`
+      : `<p class="text-gray-400 text-sm">No sales recorded for this period</p>`;
 
     // Sales chart
     const labels = d.chart_data.map(x => x.day);
@@ -244,11 +243,11 @@
     const lowList = document.querySelector("#lowStockList");
     document.querySelector("#lowStockCount").textContent = d.low_stock.length;
     lowList.innerHTML = d.low_stock.length === 0
-      ? "<p class='text-gray-400 text-xs'>Nenhum produto em stock baixo ✓</p>"
+      ? "<p class='text-gray-400 text-xs'>No low stock products ✓</p>"
       : d.low_stock.slice(0, 5).map(s => `
         <div class="flex justify-between items-center">
           <span class="text-gray-700 truncate max-w-[150px]">${escHtml(s["product__name"])} ${escHtml(s.size || "")} ${escHtml(s.color || "")}</span>
-          <span class="text-xs font-bold ${s.current_stock === 0 ? "text-red-500" : "text-yellow-600"} ml-2 flex-shrink-0">${s.current_stock === 0 ? "Esgotado" : s.current_stock + " un."}</span>
+          <span class="text-xs font-bold ${s.current_stock === 0 ? "text-red-500" : "text-yellow-600"} ml-2 flex-shrink-0">${s.current_stock === 0 ? "Out of stock" : s.current_stock + " units"}</span>
         </div>`).join("");
 
     // Stock bar
@@ -256,25 +255,25 @@
     const lowCount = d.low_stock.length;
     const pct = totalInv > 0 ? Math.min(100, Math.round((totalInv - lowCount) / totalInv * 100)) : 0;
     document.querySelector("#stockBar").style.width = pct + "%";
-    document.querySelector("#stockBarLabel").textContent = `${pct}% stock utilizado`;
+    document.querySelector("#stockBarLabel").textContent = `${pct}% stock in use`;
 
     // Top products
     document.querySelector("#topProductsList").innerHTML = d.top_products.slice(0, 4).map((p, i) =>
       `<div class="flex justify-between items-center text-sm">
       <span class="text-gray-600">${["🥇", "🥈", "🥉", "4."][i]} ${escHtml(p.name)}</span>
-      <span class="font-semibold text-gray-800">${p.units} un.</span>
+      <span class="font-semibold text-gray-800">${p.units} units</span>
     </div>`
-    ).join("") || "<p class='text-gray-400 text-xs'>Sem vendas neste período</p>";
+    ).join("") || "<p class='text-gray-400 text-xs'>No sales this period</p>";
 
     document.querySelector("#topProductsTable").innerHTML = d.top_products.map(p =>
       `<div class="flex justify-between items-center py-1.5 border-b last:border-0">
       <span class="text-gray-700 text-sm">${escHtml(p.name)}</span>
       <div class="text-right">
         <p class="text-sm font-semibold text-gray-800">${fmt(p.revenue)}</p>
-        <p class="text-xs text-gray-400">${p.units} unidades</p>
+        <p class="text-xs text-gray-400">${p.units} units</p>
       </div>
     </div>`
-    ).join("") || "<p class='text-gray-400 text-sm'>Sem dados neste período</p>";
+    ).join("") || "<p class='text-gray-400 text-sm'>No data this period</p>";
 
     // Payment donut chart
     const payLabels = Object.keys(d.payment_breakdown);
@@ -302,7 +301,7 @@
       </div>`;
       }).join("");
     } else {
-      document.querySelector("#paymentLegend").innerHTML = "<p class='text-gray-400 text-xs'>Sem vendas neste período</p>";
+      document.querySelector("#paymentLegend").innerHTML = "<p class='text-gray-400 text-xs'>No sales this period</p>";
     }
   }
 

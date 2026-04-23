@@ -203,7 +203,7 @@ def dashboard(request, **kwargs):
 
     # week_day: 1=Sunday, 2=Monday … 7=Saturday
     weekday_order = [2, 3, 4, 5, 6, 7, 1]
-    weekday_labels = {2: 'Seg', 3: 'Ter', 4: 'Qua', 5: 'Qui', 6: 'Sex', 7: 'Sáb', 1: 'Dom'}
+    weekday_labels = {2: 'Mon', 3: 'Tue', 4: 'Wed', 5: 'Thu', 6: 'Fri', 7: 'Sat', 1: 'Sun'}
     weekday_totals = defaultdict(float)
     for s in qs.values('created_at__week_day').annotate(total=Sum('total_net')):
         weekday_totals[s['created_at__week_day']] = float(s['total'])
@@ -690,8 +690,8 @@ def void_sale(request, sale_id, **kwargs):
         StockAdjustment.objects.create(
             product_variant=variant,
             quantity=item.quantity,
-            reason="Anulado",
-            notes=f"Venda #{sale.id} anulada",
+            reason="Voided",
+            notes=f"Sale #{sale.id} voided",
         )
 
     sale.delete()
@@ -921,7 +921,7 @@ def save_adjustments(request, **kwargs):
         return JsonResponse({"error": "No items"}, status=400)
 
     from .models import StockAdjustment
-    valid_reasons = {"Dano", "Perda", "Roubo", "Outro", "Reposição"}
+    valid_reasons = {"Damage", "Loss", "Theft", "Other", "Restock"}
     saved = 0
 
     for item in items:
@@ -999,7 +999,7 @@ def api_restock(request, **kwargs):
         StockAdjustment.objects.create(
             product_variant=variant,
             quantity=qty,
-            reason="Reposto",
+            reason="Restocked",
             notes="",
         )
         saved += 1

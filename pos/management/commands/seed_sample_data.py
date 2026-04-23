@@ -16,66 +16,66 @@ from pos.models import Tenant, Product, ProductVariant, Sale, SaleItem, StockAdj
 
 
 SAMPLE_PRODUCTS = [
-    {"name": "Camiseta Básica", "sku": "CAM-001", "category": "Vestuário", "variants": [
-        {"size": "S", "color": "Branco", "price": 350, "stock": 20},
-        {"size": "M", "color": "Branco", "price": 350, "stock": 25},
-        {"size": "L", "color": "Preto",  "price": 350, "stock": 18},
-        {"size": "XL", "color": "Preto", "price": 350, "stock": 10},
+    {"name": "Basic T-Shirt", "sku": "CAM-001", "category": "Clothing", "variants": [
+        {"size": "S", "color": "White", "price": 350, "stock": 20},
+        {"size": "M", "color": "White", "price": 350, "stock": 25},
+        {"size": "L", "color": "Black", "price": 350, "stock": 18},
+        {"size": "XL", "color": "Black","price": 350, "stock": 10},
     ]},
-    {"name": "Calças Jeans", "sku": "CAL-001", "category": "Vestuário", "variants": [
-        {"size": "32", "color": "Azul",  "price": 850, "stock": 8},
-        {"size": "34", "color": "Azul",  "price": 850, "stock": 6},
-        {"size": "36", "color": "Preto", "price": 900, "stock": 5},
-        {"size": "38", "color": "Azul",  "price": 900, "stock": 4},
+    {"name": "Denim Jeans", "sku": "CAL-001", "category": "Clothing", "variants": [
+        {"size": "32", "color": "Blue",  "price": 850, "stock": 8},
+        {"size": "34", "color": "Blue",  "price": 850, "stock": 6},
+        {"size": "36", "color": "Black", "price": 900, "stock": 5},
+        {"size": "38", "color": "Blue",  "price": 900, "stock": 4},
     ]},
-    {"name": "Polo Masculino", "sku": "POL-001", "category": "Vestuário", "variants": [
-        {"size": "M", "color": "Azul Marinho", "price": 550, "stock": 12},
-        {"size": "L", "color": "Azul Marinho", "price": 550, "stock": 10},
-        {"size": "M", "color": "Branco",       "price": 550, "stock": 8},
+    {"name": "Men's Polo", "sku": "POL-001", "category": "Clothing", "variants": [
+        {"size": "M", "color": "Navy", "price": 550, "stock": 12},
+        {"size": "L", "color": "Navy", "price": 550, "stock": 10},
+        {"size": "M", "color": "White","price": 550, "stock": 8},
     ]},
-    {"name": "Shorts Desportivos", "sku": "SHO-001", "category": "Vestuário", "variants": [
-        {"size": "M", "color": "Preto", "price": 400, "stock": 15},
-        {"size": "L", "color": "Preto", "price": 400, "stock": 12},
-        {"size": "M", "color": "Cinza", "price": 400, "stock": 9},
+    {"name": "Sports Shorts", "sku": "SHO-001", "category": "Clothing", "variants": [
+        {"size": "M", "color": "Black", "price": 400, "stock": 15},
+        {"size": "L", "color": "Black", "price": 400, "stock": 12},
+        {"size": "M", "color": "Grey",  "price": 400, "stock": 9},
     ]},
-    {"name": "Sapatilhas Desportivas", "sku": "SAP-001", "category": "Calçado", "variants": [
-        {"size": "39", "color": "Branco", "price": 1200, "stock": 6},
-        {"size": "40", "color": "Branco", "price": 1200, "stock": 8},
-        {"size": "42", "color": "Preto",  "price": 1200, "stock": 7},
-        {"size": "44", "color": "Preto",  "price": 1200, "stock": 4},
+    {"name": "Running Sneakers", "sku": "SAP-001", "category": "Footwear", "variants": [
+        {"size": "39", "color": "White", "price": 1200, "stock": 6},
+        {"size": "40", "color": "White", "price": 1200, "stock": 8},
+        {"size": "42", "color": "Black", "price": 1200, "stock": 7},
+        {"size": "44", "color": "Black", "price": 1200, "stock": 4},
     ]},
-    {"name": "Sandálias", "sku": "SAN-001", "category": "Calçado", "variants": [
-        {"size": "37", "color": "Castanho", "price": 650, "stock": 10},
-        {"size": "38", "color": "Castanho", "price": 650, "stock": 8},
-        {"size": "40", "color": "Preto",    "price": 650, "stock": 6},
+    {"name": "Sandals", "sku": "SAN-001", "category": "Footwear", "variants": [
+        {"size": "37", "color": "Brown", "price": 650, "stock": 10},
+        {"size": "38", "color": "Brown", "price": 650, "stock": 8},
+        {"size": "40", "color": "Black", "price": 650, "stock": 6},
     ]},
-    {"name": "Mochila Desportiva", "sku": "MOC-001", "category": "Acessórios", "variants": [
-        {"size": "", "color": "Preto", "price": 950,  "stock": 10},
-        {"size": "", "color": "Cinza", "price": 950,  "stock": 7},
-        {"size": "", "color": "Azul",  "price": 950,  "stock": 5},
+    {"name": "Sports Backpack", "sku": "MOC-001", "category": "Accessories", "variants": [
+        {"size": "", "color": "Black", "price": 950, "stock": 10},
+        {"size": "", "color": "Grey",  "price": 950, "stock": 7},
+        {"size": "", "color": "Blue",  "price": 950, "stock": 5},
     ]},
-    {"name": "Boné", "sku": "BON-001", "category": "Acessórios", "variants": [
-        {"size": "", "color": "Preto",      "price": 250, "stock": 20},
-        {"size": "", "color": "Branco",     "price": 250, "stock": 15},
-        {"size": "", "color": "Azul Marinho","price": 250, "stock": 12},
+    {"name": "Baseball Cap", "sku": "BON-001", "category": "Accessories", "variants": [
+        {"size": "", "color": "Black", "price": 250, "stock": 20},
+        {"size": "", "color": "White", "price": 250, "stock": 15},
+        {"size": "", "color": "Navy",  "price": 250, "stock": 12},
     ]},
-    {"name": "Cinto de Couro", "sku": "CIN-001", "category": "Acessórios", "variants": [
-        {"size": "M", "color": "Preto",    "price": 380, "stock": 10},
-        {"size": "L", "color": "Preto",    "price": 380, "stock": 8},
-        {"size": "M", "color": "Castanho", "price": 380, "stock": 6},
+    {"name": "Leather Belt", "sku": "CIN-001", "category": "Accessories", "variants": [
+        {"size": "M", "color": "Black", "price": 380, "stock": 10},
+        {"size": "L", "color": "Black", "price": 380, "stock": 8},
+        {"size": "M", "color": "Brown", "price": 380, "stock": 6},
     ]},
-    {"name": "Garrafa de Água 1L", "sku": "GAR-001", "category": "Acessórios", "variants": [
-        {"size": "", "color": "Azul",     "price": 120, "stock": 30},
-        {"size": "", "color": "Vermelho", "price": 120, "stock": 25},
-        {"size": "", "color": "Preto",    "price": 120, "stock": 20},
+    {"name": "Water Bottle 1L", "sku": "GAR-001", "category": "Accessories", "variants": [
+        {"size": "", "color": "Blue",   "price": 120, "stock": 30},
+        {"size": "", "color": "Red",    "price": 120, "stock": 25},
+        {"size": "", "color": "Black",  "price": 120, "stock": 20},
     ]},
-    {"name": "Auriculares Bluetooth", "sku": "AUR-001", "category": "Electrónica", "variants": [
-        {"size": "", "color": "Preto",  "price": 1800, "stock": 8},
-        {"size": "", "color": "Branco", "price": 1800, "stock": 6},
+    {"name": "Bluetooth Earphones", "sku": "AUR-001", "category": "Electronics", "variants": [
+        {"size": "", "color": "Black", "price": 1800, "stock": 8},
+        {"size": "", "color": "White", "price": 1800, "stock": 6},
     ]},
-    {"name": "Carregador Portátil", "sku": "CAR-001", "category": "Electrónica", "variants": [
-        {"size": "", "color": "Preto",  "price": 1100, "stock": 10},
-        {"size": "", "color": "Branco", "price": 1100, "stock": 7},
+    {"name": "Portable Charger", "sku": "CAR-001", "category": "Electronics", "variants": [
+        {"size": "", "color": "Black", "price": 1100, "stock": 10},
+        {"size": "", "color": "White", "price": 1100, "stock": 7},
     ]},
 ]
 
@@ -90,10 +90,10 @@ ATTENDANTS = [
     ("João",    0.15),
 ]
 
-PAYMENT_METHODS = ['Dinheiro', 'M-Pesa', 'E-Mola', 'Cartao', 'POS', 'Transferencia']
-PAYMENT_WEIGHTS  = [0.28,       0.25,     0.22,     0.12,     0.08,  0.05]
+PAYMENT_METHODS = ['Cash', 'M-Pesa', 'E-Mola', 'Card', 'POS', 'Transfer']
+PAYMENT_WEIGHTS  = [0.28,   0.25,     0.22,     0.12,   0.08,  0.05]
 
-LOCATIONS = [('Loja', 0.85), ('Online', 0.15)]
+LOCATIONS = [('Store', 0.85), ('Online', 0.15)]
 
 HISTORY_DAYS = 180  # 6 months
 

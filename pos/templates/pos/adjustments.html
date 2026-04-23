@@ -1,8 +1,8 @@
 {% extends "pos/base.html" %}
 {% load static %}
-{% block title %}Histórico de Ajustes{% endblock %}
+{% block title %}Adjustment History{% endblock %}
 {% block nav_restock %}active{% endblock %}
-{% block page_title %}Histórico de Ajustes de Stock{% endblock %}
+{% block page_title %}Stock Adjustment History{% endblock %}
 
 {% block content %}
 <div class="space-y-5">
@@ -13,33 +13,33 @@
   <!-- Filters -->
   <div class="bg-white rounded-xl border shadow-sm p-4 flex flex-wrap gap-3 items-end">
     <div>
-      <label class="block text-xs font-medium text-gray-500 mb-1">De</label>
+      <label class="block text-xs font-medium text-gray-500 mb-1">From</label>
       <input type="date" id="filterFrom" class="p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
     </div>
     <div>
-      <label class="block text-xs font-medium text-gray-500 mb-1">Até</label>
+      <label class="block text-xs font-medium text-gray-500 mb-1">To</label>
       <input type="date" id="filterTo" class="p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
     </div>
     <div>
-      <label class="block text-xs font-medium text-gray-500 mb-1">Motivo</label>
+      <label class="block text-xs font-medium text-gray-500 mb-1">Reason</label>
       <select id="filterReason" class="p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 bg-white">
-        <option value="">Todos</option>
-        <option>Dano</option>
-        <option>Perda</option>
-        <option>Roubo</option>
-        <option>Reposição</option>
-        <option>Reposto</option>
-        <option>Anulado</option>
-        <option>Outro</option>
+        <option value="">All</option>
+        <option>Damage</option>
+        <option>Loss</option>
+        <option>Theft</option>
+        <option>Restock</option>
+        <option>Restocked</option>
+        <option>Voided</option>
+        <option>Other</option>
       </select>
     </div>
-    <button onclick="loadHistory()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors">Filtrar</button>
-    <button onclick="clearFilters()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors">Limpar</button>
+    <button onclick="loadHistory()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors">Filter</button>
+    <button onclick="clearFilters()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors">Clear</button>
   </div>
 
   <!-- Truncation notice -->
   <div id="adjTruncNotice" class="hidden bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-700">
-    A mostrar <span id="adjShowing"></span> de <span id="adjTotal"></span> registos. Use os filtros para refinar.
+    Showing <span id="adjShowing"></span> of <span id="adjTotal"></span> records. Use filters to refine.
   </div>
 
   <!-- Table -->
@@ -47,20 +47,20 @@
     <table class="w-full text-sm">
       <thead class="bg-gray-50 border-b">
         <tr>
-          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Data</th>
-          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Produto</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Date</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Product</th>
           <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">SKU</th>
-          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">Tam.</th>
-          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">Cor</th>
-          <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Motivo</th>
-          <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Quantidade</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">Size</th>
+          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">Color</th>
+          <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Reason</th>
+          <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Quantity</th>
         </tr>
       </thead>
       <tbody id="adjTable" class="divide-y divide-gray-50"></tbody>
     </table>
     <div id="adjEmpty" class="hidden text-center py-16 text-gray-400">
       <p class="text-4xl mb-2">📋</p>
-      <p class="text-lg font-medium">Nenhum ajuste encontrado</p>
+      <p class="text-lg font-medium">No adjustments found</p>
     </div>
   </div>
 
@@ -70,13 +70,13 @@
 {% block scripts %}
 <script>
 const REASON_COLORS = {
-  "Dano": "bg-orange-100 text-orange-700",
-  "Perda": "bg-yellow-100 text-yellow-700",
-  "Roubo": "bg-red-100 text-red-700",
-  "Reposição": "bg-purple-100 text-purple-700",
-  "Reposto": "bg-green-100 text-green-700",
-  "Anulado": "bg-amber-100 text-amber-700",
-  "Outro": "bg-gray-100 text-gray-600",
+  "Damage":    "bg-orange-100 text-orange-700",
+  "Loss":      "bg-yellow-100 text-yellow-700",
+  "Theft":     "bg-red-100 text-red-700",
+  "Restock":   "bg-purple-100 text-purple-700",
+  "Restocked": "bg-green-100 text-green-700",
+  "Voided":    "bg-amber-100 text-amber-700",
+  "Other":     "bg-gray-100 text-gray-600",
 };
 
 async function loadHistory() {
@@ -116,19 +116,19 @@ function renderTable({ results: rows, total, showing, total_removed, total_added
   stats.innerHTML = `
     <div class="bg-white rounded-xl border shadow-sm p-4">
       <p class="text-2xl font-bold text-gray-800">${total}</p>
-      <p class="text-xs text-gray-500 mt-0.5">Total de registos</p>
+      <p class="text-xs text-gray-500 mt-0.5">Total records</p>
     </div>
     <div class="bg-white rounded-xl border shadow-sm p-4">
       <p class="text-2xl font-bold text-red-500">${total_removed}</p>
-      <p class="text-xs text-gray-500 mt-0.5">Unidades removidas</p>
+      <p class="text-xs text-gray-500 mt-0.5">Units removed</p>
     </div>
     <div class="bg-white rounded-xl border shadow-sm p-4">
       <p class="text-2xl font-bold text-purple-600">${topReason ? topReason[0] : "–"}</p>
-      <p class="text-xs text-gray-500 mt-0.5">Motivo mais frequente</p>
+      <p class="text-xs text-gray-500 mt-0.5">Top reason</p>
     </div>
     <div class="bg-white rounded-xl border shadow-sm p-4">
       <p class="text-2xl font-bold text-green-600">${total_added}</p>
-      <p class="text-xs text-gray-500 mt-0.5">Unidades repostas</p>
+      <p class="text-xs text-gray-500 mt-0.5">Units restocked</p>
     </div>
   `;
 
@@ -140,7 +140,7 @@ function renderTable({ results: rows, total, showing, total_removed, total_added
   rows.forEach(r => {
     const tr = document.createElement("tr");
     tr.className = "hover:bg-gray-50 transition-colors";
-    const colorClass = REASON_COLORS[r.reason] || REASON_COLORS["Outro"];
+    const colorClass = REASON_COLORS[r.reason] || REASON_COLORS["Other"];
     tr.innerHTML = `
       <td class="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">${escHtml(r.date)}</td>
       <td class="px-4 py-3 font-medium text-gray-800">${escHtml(r.product_name)}</td>
