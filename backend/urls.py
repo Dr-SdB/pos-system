@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import RedirectView
 from pos import views as v
 
 tenant_urlpatterns = [
@@ -32,6 +33,7 @@ tenant_urlpatterns = [
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("login/", RedirectView.as_view(url="/admin/", permanent=False)),
     path("", v.root_redirect, name="root"),
     path("<slug:tenant_slug>/", include(tenant_urlpatterns)),
 ]
