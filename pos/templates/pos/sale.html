@@ -1,7 +1,7 @@
 {% extends "pos/base.html" %}
 {% load static %}
 {% block title %}New Sale{% endblock %}
-{% block nav_sale %}nav-active{% endblock %}
+{% block nav_sale %}active{% endblock %}
 {% block page_title %}New Sale{% endblock %}
 
 {% block content %}
@@ -14,14 +14,14 @@
       <div class="relative">
         <input id="saleSearch" type="text" placeholder="Search by name or SKU…"
           class="w-full p-3 pr-10 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
-        <span class="absolute right-3 top-3 text-gray-400">🔍</span>
+        <span class="absolute right-3 top-3 text-gray-400" style="display:flex;"><i data-lucide="search" style="width:16px;height:16px;stroke-width:2;color:#9ca3af;"></i></span>
       </div>
       <div id="searchResults" class="mt-3 space-y-2 max-h-72 overflow-y-auto"></div>
     </div>
 
     <!-- Sale details -->
     <div class="bg-white rounded-xl border shadow-sm p-4 space-y-3">
-      <p class="font-semibold text-gray-700">🧾 Sale Details</p>
+      <div class="flex items-center gap-2"><i data-lucide="receipt" style="width:15px;height:15px;color:#6b7280;stroke-width:1.75;"></i><p class="font-semibold text-gray-700">Sale Details</p></div>
 
       <div>
         <p class="text-xs text-gray-500 font-medium mb-2">Payment method</p>
@@ -56,12 +56,12 @@
   <div class="space-y-4">
     <div class="bg-white rounded-xl border shadow-sm p-4">
       <div class="flex items-center gap-2 mb-4">
-        <span>🛒</span>
+        <i data-lucide="shopping-cart" style="width:15px;height:15px;color:#6b7280;stroke-width:1.75;"></i>
         <p class="font-semibold text-gray-700">Cart</p>
       </div>
       <div id="cartItems" class="space-y-3 min-h-24">
         <div class="flex flex-col items-center justify-center h-24 text-gray-400">
-          <span class="text-3xl">🛒</span>
+          <i data-lucide="shopping-cart" style="width:36px;height:36px;color:#d1d5db;margin-bottom:4px;"></i>
           <p class="text-sm mt-1">Select a product to continue</p>
         </div>
       </div>
@@ -104,7 +104,7 @@
 <!-- Receipt modal -->
 <div id="receiptModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
   <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center space-y-4">
-    <div class="text-5xl">✅</div>
+    <div><i data-lucide="check-circle" style="width:52px;height:52px;color:#16a34a;margin:0 auto;"></i></div>
     <h2 class="text-2xl font-bold">Sale Completed!</h2>
     <p id="receiptSub" class="text-gray-500 text-sm"></p>
     <div id="receiptBody" class="bg-gray-50 rounded-xl p-4 space-y-1 text-sm text-left"></div>
@@ -291,7 +291,7 @@ async function checkout() {
   const amountPaid = isCash ? Number(document.querySelector("#amountPaid").value || 0) : total;
 
   if (isCash && amountPaid < total) {
-    alert(`Amount received (${mzn(amountPaid)}) is less than the total (${mzn(total)}).`);
+    showToast(`Amount received (${mzn(amountPaid)}) is less than the total (${mzn(total)}).`, "warning");
     btn.disabled = false; btn.textContent = "Complete Sale";
     return;
   }
@@ -310,7 +310,7 @@ async function checkout() {
     const data = await res.json();
 
     if (!res.ok || data.error) {
-      alert("Error: " + (data.error || "Unknown error")); return;
+      showToast("Error: " + (data.error || "Unknown error"), "error"); return;
     }
 
     clearCart();
@@ -326,11 +326,12 @@ async function checkout() {
       ${data.change > 0 ? `<div class="flex justify-between text-green-600 font-medium"><span>Change</span><span>${mzn(data.change)}</span></div>` : ""}
     `;
     document.querySelector("#receiptModal").classList.remove("hidden");
-  } catch { alert("Network error. Please try again."); }
+    if (window.lucide) lucide.createIcons();
+  } catch { showToast("Network error. Please try again.", "error"); }
   finally { btn.disabled = false; btn.textContent = "Complete Sale"; }
 }
 
 document.querySelector("#btnCheckout").addEventListener("click", checkout);
-document.addEventListener("DOMContentLoaded", renderCart);
+document.addEventListener("DOMContentLoaded", () => { renderCart(); if (window.lucide) lucide.createIcons(); });
 </script>
 {% endblock %}
