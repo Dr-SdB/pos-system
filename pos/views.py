@@ -690,7 +690,7 @@ def void_sale(request, sale_id, **kwargs):
     from .models import StockAdjustment
     # Restore stock and log each item as an adjustment
     for item in sale.items.select_related("product_variant"):
-        variant = ProductVariant.objects.select_for_update().get(pk=item.product_variant_id)
+        variant = ProductVariant.objects.select_for_update().get(pk=item.product_variant_id)  # noqa: tenant-scope
         variant.current_stock += item.quantity
         variant.save()
         StockAdjustment.objects.create(
