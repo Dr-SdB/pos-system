@@ -62,7 +62,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Uses DATABASE_URL if set (Railway), otherwise falls back to individual DB_* vars (local)
 _database_url = config('DATABASE_URL', default='')
 if _database_url:
-    DATABASES = {'default': dj_database_url.parse(_database_url)}
+    DATABASES = {'default': dj_database_url.parse(_database_url, conn_max_age=60)}
 else:
     DATABASES = {
         'default': {
@@ -72,6 +72,7 @@ else:
             'PASSWORD': config('DB_PASSWORD', default=''),
             'HOST': config('DB_HOST', default=''),
             'PORT': config('DB_PORT', default=''),
+            'CONN_MAX_AGE': 60,
         }
     }
 
