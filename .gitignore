@@ -1,5 +1,7 @@
-# Claude Code session data
-.claude/
+# Claude Code session data (transcripts only — hooks/settings are tracked)
+.claude/transcripts/
+.claude/todos/
+.claude/*.json.bak
 
 # Environment variables — NEVER commit these
 .env

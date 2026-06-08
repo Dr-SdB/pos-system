@@ -2,7 +2,6 @@
 {% load static %}
 {% block title %}Restock{% endblock %}
 {% block nav_restock %}active{% endblock %}
-{% block nav_adjustments %}{% endblock %}
 {% block page_title %}Restock{% endblock %}
 
 {% block content %}
@@ -103,8 +102,6 @@
 
 </div>
 
-<!-- Toast -->
-<div id="toast" class="hidden fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl text-white font-medium shadow-lg transition-all"></div>
 {% endblock %}
 
 {% block scripts %}
@@ -146,14 +143,21 @@ function renderTable() {
     const added = changes[p.id] || 0;
     const newTotal = p.stock + added;
     const isLow = p.stock <= 5, isOut = p.stock === 0, hasChange = added > 0;
+    const dot = isOut
+      ? '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#dc2626;margin-right:5px;flex-shrink:0;"></span>'
+      : isLow
+        ? '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#d97706;margin-right:5px;flex-shrink:0;"></span>'
+        : '';
     const tr = document.createElement("tr");
-    tr.className = "hover:bg-gray-50 transition-colors" + (hasChange ? " bg-purple-50" : isOut ? " bg-red-50" : isLow ? " bg-yellow-50" : "");
+    tr.className = "hover:bg-gray-50 transition-colors" + (hasChange ? " bg-purple-50" : "");
     tr.innerHTML = `
       <td class="px-4 py-3"><p class="font-medium text-gray-800">${escHtml(p.product_name)}</p><p class="text-xs text-gray-400">${escHtml(p.category||"")}</p></td>
       <td class="px-4 py-3 font-mono text-xs text-gray-400 hidden sm:table-cell">${escHtml(p.sku)}</td>
       <td class="px-4 py-3 text-gray-500 hidden md:table-cell">${escHtml(p.size||"–")}</td>
       <td class="px-4 py-3 text-gray-500 hidden md:table-cell">${escHtml(p.color||"–")}</td>
-      <td class="px-4 py-3 text-right font-bold ${isOut?"text-red-500":isLow?"text-yellow-600":"text-gray-700"}">${isOut?"Out of stock":p.stock}${isLow&&!isOut?" ⚠️":""}</td>
+      <td class="px-4 py-3 text-right font-bold text-gray-700">
+        <span style="display:inline-flex;align-items:center;justify-content:flex-end;">${dot}${isOut?"Out of stock":p.stock}</span>
+      </td>
       <td class="px-4 py-3">
         <div class="flex items-center justify-center gap-2">
           <button onclick="adjust(${p.id},-1)" class="w-8 h-8 rounded-lg border bg-gray-50 hover:bg-gray-100 font-bold text-gray-600 flex items-center justify-center">−</button>
@@ -187,7 +191,7 @@ function resetAll() { changes = {}; renderTable(); }
 
 async function saveAll() {
   const ids = Object.keys(changes);
-  if (!ids.length) { showToast("No changes to save.", "red"); return; }
+  if (!ids.length) { showToast("No changes to save.", "error"); return; }
 
   const items = ids.map(id => ({ variant_id: parseInt(id), quantity: changes[id] }));
   const res = await fetch(`/${SLUG}/api/restock`, {
@@ -196,11 +200,11 @@ async function saveAll() {
     body: JSON.stringify({ items }),
   });
   const data = await res.json();
-  if (!res.ok || data.error) { showToast("Error saving restock.", "red"); return; }
+  if (!res.ok || data.error) { showToast("Error saving restock.", "error"); return; }
 
   changes = {};
   await loadProducts();
-  showToast(`✓ ${data.saved} product${data.saved!==1?"s":""} updated!`, "green");
+  showToast(`✓ ${data.saved} product${data.saved!==1?"s":""} updated!`, "success");
 }
 
 function renderAdjustTable() {
@@ -216,13 +220,16 @@ function renderAdjustTable() {
     const hasChange = adj.qty > 0;
     const newTotal = Math.max(0, p.stock - adj.qty);
     const tr = document.createElement("tr");
-    tr.className = "hover:bg-gray-50 transition-colors" + (hasChange ? " bg-red-50" : "");
+    const adjDot = p.stock===0 ? '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#dc2626;margin-right:5px;flex-shrink:0;"></span>' : '';
+    tr.className = "hover:bg-gray-50 transition-colors";
     tr.innerHTML = `
       <td class="px-4 py-3"><p class="font-medium text-gray-800">${escHtml(p.product_name)}</p></td>
       <td class="px-4 py-3 font-mono text-xs text-gray-400 hidden sm:table-cell">${escHtml(p.sku)}</td>
       <td class="px-4 py-3 text-gray-500 hidden md:table-cell">${escHtml(p.size||"–")}</td>
       <td class="px-4 py-3 text-gray-500 hidden md:table-cell">${escHtml(p.color||"–")}</td>
-      <td class="px-4 py-3 text-right font-bold ${p.stock===0?"text-red-500":"text-gray-700"}">${p.stock===0?"Out of stock":p.stock}</td>
+      <td class="px-4 py-3 text-right font-bold text-gray-700">
+        <span style="display:inline-flex;align-items:center;justify-content:flex-end;">${adjDot}${p.stock===0?"Out of stock":p.stock}</span>
+      </td>
       <td class="px-4 py-3">
         <div class="flex items-center justify-center gap-2">
           <button onclick="adjDelta(${p.id},-1)" class="w-8 h-8 rounded-lg border bg-gray-50 hover:bg-gray-100 font-bold text-gray-600 flex items-center justify-center">−</button>
@@ -271,7 +278,7 @@ function resetAdjust() { adjustments = {}; renderAdjustTable(); }
 
 async function saveAdjust() {
   const ids = Object.keys(adjustments);
-  if (!ids.length) { showToast("No adjustments to apply.", "red"); return; }
+  if (!ids.length) { showToast("No adjustments to apply.", "error"); return; }
 
   const items = ids.map(id => ({
     variant_id: parseInt(id),
@@ -287,20 +294,12 @@ async function saveAdjust() {
   const data = await res.json();
 
   if (!res.ok || data.error) {
-    showToast("Error saving adjustments.", "red"); return;
+    showToast("Error saving adjustments.", "error"); return;
   }
 
   adjustments = {};
   await loadProducts();
-  showToast(`✓ ${data.saved} adjustment${data.saved!==1?"s":""} applied!`, "green");
-}
-
-function showToast(msg, color="green") {
-  const toast = document.querySelector("#toast");
-  toast.textContent = msg;
-  toast.style.background = color === "red" ? "#dc2626" : "#16a34a";
-  toast.classList.remove("hidden");
-  setTimeout(() => toast.classList.add("hidden"), 3000);
+  showToast(`✓ ${data.saved} adjustment${data.saved!==1?"s":""} applied!`, "success");
 }
 
 document.addEventListener("DOMContentLoaded", () => {

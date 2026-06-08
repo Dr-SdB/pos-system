@@ -59,12 +59,20 @@ class ProductVariant(models.Model):
 
     class Meta:
         unique_together = (("product", "size", "color"),)
+        indexes = [
+            models.Index(fields=["is_active"], name="pv_is_active_idx"),
+        ]
 
     def __str__(self):
         return f"{self.product.name} - {self.size} - {self.color} ({self.variant_sku})"
 
 
 class Sale(models.Model):
+    class Meta:
+        indexes = [
+            models.Index(fields=["tenant", "created_at"], name="sale_tenant_created_idx"),
+        ]
+
     PAYMENT_CHOICES = [
         ("Dinheiro", "Dinheiro"),
         ("M-Pesa", "M-Pesa"),
@@ -108,6 +116,11 @@ class SaleItem(models.Model):
 
 
 class StockAdjustment(models.Model):
+    class Meta:
+        indexes = [
+            models.Index(fields=["created_at"], name="stockadj_created_idx"),
+        ]
+
     REASON_CHOICES = [
         ("Dano", "Dano"),
         ("Perda", "Perda"),

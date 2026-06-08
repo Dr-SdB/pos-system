@@ -1,7 +1,7 @@
 {% extends "pos/base.html" %}
 {% load static %}
 {% block title %}Catalogue{% endblock %}
-{% block nav_catalogue %}nav-active{% endblock %}
+{% block nav_catalogue %}active{% endblock %}
 {% block page_title %}Product Catalogue{% endblock %}
 
 {% block header_actions %}
@@ -31,10 +31,16 @@
           <th class="text-right px-4 py-3 font-semibold text-gray-500 text-xs uppercase">Stock</th>
         </tr>
       </thead>
-      <tbody id="catTable" class="divide-y divide-gray-50"></tbody>
+      <tbody id="catTable" class="divide-y divide-gray-50">
+        <!-- skeleton rows -->
+        <tr class="animate-pulse"><td colspan="7" class="px-4 py-3"><span class="skeleton block w-full h-4"></span></td></tr>
+        <tr class="animate-pulse"><td colspan="7" class="px-4 py-3"><span class="skeleton block w-5/6 h-4"></span></td></tr>
+        <tr class="animate-pulse"><td colspan="7" class="px-4 py-3"><span class="skeleton block w-4/5 h-4"></span></td></tr>
+      </tbody>
     </table>
     <div id="catEmpty" class="hidden text-center py-12 text-gray-400">
-      <p class="text-3xl mb-2">📦</p><p>No products found.</p>
+      <i data-lucide="package" style="width:40px;height:40px;margin:0 auto 8px;color:#d1d5db;"></i>
+      <p>No products found.</p>
     </div>
   </div>
 </div>
@@ -86,7 +92,6 @@
         <label class="text-xs text-gray-500 font-medium">Product name *</label>
         <input id="addName" placeholder="E.g. Basic T-Shirt" class="w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none" />
       </div>
-      <!-- SKU is auto-generated server-side — hidden from user -->
       <div>
         <label class="text-xs text-gray-500 font-medium">Size</label>
         <input id="addSize" placeholder="M, L, 42…" class="w-full mt-1 p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none" />
@@ -122,6 +127,12 @@ let allProducts = [];
 
 function closeModal(id) { document.querySelector("#"+id).classList.add("hidden"); }
 
+function stockDot(stock) {
+  if (stock === 0) return '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#dc2626;margin-right:5px;vertical-align:middle;flex-shrink:0;"></span>';
+  if (stock <= 5)  return '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#d97706;margin-right:5px;vertical-align:middle;flex-shrink:0;"></span>';
+  return '';
+}
+
 async function loadCatalogue(query="") {
   const res = await fetch(`/${SLUG}/api/catalogue`);
   const data = await res.json();
@@ -141,15 +152,14 @@ function renderTable(query="") {
 
   if (!filtered.length) {
     document.querySelector("#catEmpty").classList.remove("hidden");
+    if (window.lucide) lucide.createIcons();
     return;
   }
   document.querySelector("#catEmpty").classList.add("hidden");
 
   filtered.forEach(p => {
-    const low = p.stock <= 5;
-    const out = p.stock === 0;
     const tr = document.createElement("tr");
-    tr.className = "hover:bg-gray-50 transition-colors" + (out ? " bg-red-50" : low ? " bg-yellow-50" : "");
+    tr.className = "hover:bg-gray-50 transition-colors";
     tr.innerHTML = `
       <td class="px-4 py-3 font-mono text-xs text-gray-400">${escHtml(p.sku)}</td>
       <td class="px-4 py-3 font-medium text-gray-800">${escHtml(p.product_name)}</td>
@@ -157,7 +167,9 @@ function renderTable(query="") {
       <td class="px-4 py-3 text-gray-600 hidden sm:table-cell">${escHtml(p.color||"–")}</td>
       <td class="px-4 py-3 text-gray-500 hidden md:table-cell text-xs">${escHtml(p.category||"–")}</td>
       <td class="px-4 py-3 text-right font-semibold text-gray-800">${Number(p.price).toLocaleString("pt-MZ")}</td>
-      <td class="px-4 py-3 text-right font-bold ${out?"text-red-500":low?"text-yellow-600":"text-gray-700"}">${p.stock}</td>
+      <td class="px-4 py-3 text-right font-bold text-gray-700">
+        <span style="display:inline-flex;align-items:center;justify-content:flex-end;">${stockDot(p.stock)}${p.stock}</span>
+      </td>
     `;
     tbody.appendChild(tr);
   });
@@ -186,7 +198,7 @@ async function saveEdit() {
     stock: document.querySelector("#editStock").value,
     category: document.querySelector("#editCategory").value,
   };
-  await fetch(`/${SLUG}/api/catalogue/${id}`, { method:"PATCH", headers: csrfHeaders(), body:JSON.stringify(payload) });
+  await fetch(`/${SLUG}/api/catalogue/${id}`, { method:"PATCH", headers:csrfHeaders(), body:JSON.stringify(payload) });
   closeModal("editModal");
   loadCatalogue(document.querySelector("#catSearch").value);
 }
@@ -202,16 +214,16 @@ async function saveAdd() {
     stock: document.querySelector("#addStock").value || 0,
     category: document.querySelector("#addCategory").value,
   };
-  const res = await fetch(`/${SLUG}/api/catalogue/add`, { method:"POST", headers: csrfHeaders(), body:JSON.stringify(payload) });
+  const res = await fetch(`/${SLUG}/api/catalogue/add`, { method:"POST", headers:csrfHeaders(), body:JSON.stringify(payload) });
   const data = await res.json();
-  if (data.error) { alert("Error: " + data.error); return; }
+  if (data.error) { showToast("Error: " + data.error, "error"); return; }
   closeModal("addModal");
   loadCatalogue();
 }
 
 async function deleteVariant(id) {
   if (!confirm("Remove this product from the catalogue?")) return;
-  await fetch(`/${SLUG}/api/catalogue/${id}`, { method:"DELETE", headers: { 'X-CSRFToken': csrfToken() } });
+  await fetch(`/${SLUG}/api/catalogue/${id}`, { method:"DELETE", headers:{ 'X-CSRFToken':csrfToken() } });
   loadCatalogue(document.querySelector("#catSearch").value);
 }
 
