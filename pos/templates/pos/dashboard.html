@@ -7,12 +7,12 @@
 {% block header_actions %}
 <a href="/{{ request.tenant.subdomain }}/availability/"
   class="text-sm px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-gray-600">
-  Ver inventário
+  View inventory
 </a>
 <a href="/{{ request.tenant.subdomain }}/sale/"
   class="text-sm px-4 py-1.5 rounded-lg font-medium text-white transition-colors"
   style="background-color: var(--primary);">
-  + Registar venda
+  + New Sale
 </a>
 {% endblock %}
 
@@ -22,24 +22,24 @@
   <!-- Period selector -->
   <div class="flex items-center justify-between">
     <div>
-      <p class="text-[11px] text-gray-400 uppercase tracking-wider font-semibold">Resumo de</p>
+      <p class="text-[11px] text-gray-400 uppercase tracking-wider font-semibold">Summary for</p>
       <h2 class="text-xl font-semibold text-gray-900" id="monthLabel">—</h2>
     </div>
     <div class="flex items-center gap-2">
       <select id="selMonth"
         class="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-200">
-        <option value="1">Janeiro</option>
-        <option value="2">Fevereiro</option>
-        <option value="3">Março</option>
-        <option value="4">Abril</option>
-        <option value="5">Maio</option>
-        <option value="6">Junho</option>
-        <option value="7">Julho</option>
-        <option value="8">Agosto</option>
-        <option value="9">Setembro</option>
-        <option value="10">Outubro</option>
-        <option value="11">Novembro</option>
-        <option value="12">Dezembro</option>
+        <option value="1">January</option>
+        <option value="2">February</option>
+        <option value="3">March</option>
+        <option value="4">April</option>
+        <option value="5">May</option>
+        <option value="6">June</option>
+        <option value="7">July</option>
+        <option value="8">August</option>
+        <option value="9">September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
       </select>
       <select id="selYear"
         class="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-200">
@@ -59,7 +59,7 @@
         </div>
         <span id="kpiChange" class="text-[11px] font-semibold px-2 py-0.5 rounded-full"></span>
       </div>
-      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Receita</p>
+      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Revenue</p>
       <p class="text-2xl font-semibold text-gray-900 skel h-8 w-32" id="kpiRevenue"></p>
     </div>
 
@@ -69,7 +69,7 @@
           <i data-lucide="shopping-basket" class="w-5 h-5 text-blue-500"></i>
         </div>
       </div>
-      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Unidades vendidas</p>
+      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Units sold</p>
       <p class="text-2xl font-semibold text-gray-900 skel h-8 w-16" id="kpiSales"></p>
     </div>
 
@@ -79,7 +79,7 @@
           <i data-lucide="credit-card" class="w-5 h-5 text-amber-500"></i>
         </div>
       </div>
-      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Meio de pagamento</p>
+      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Top payment</p>
       <p class="text-2xl font-semibold text-gray-900 skel h-8 w-24" id="kpiPayment"></p>
     </div>
 
@@ -89,7 +89,7 @@
           <i data-lucide="package" class="w-5 h-5 text-green-500"></i>
         </div>
       </div>
-      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Unidades no inventário</p>
+      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Inventory units</p>
       <p class="text-2xl font-semibold text-gray-900 skel h-8 w-16" id="kpiInventory"></p>
     </div>
 
@@ -101,8 +101,8 @@
     <!-- Sales trend line chart (8 cols) -->
     <div class="col-span-12 lg:col-span-8 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
       <div class="mb-5">
-        <h3 class="text-base font-semibold text-gray-900">Tendência de receita</h3>
-        <p class="text-xs text-gray-400 mt-0.5">Desempenho diário no mês selecionado</p>
+        <h3 class="text-base font-semibold text-gray-900">Revenue trend</h3>
+        <p class="text-xs text-gray-400 mt-0.5">Daily performance for the selected month</p>
       </div>
       <div class="h-64 relative">
         <canvas id="salesChart"></canvas>
@@ -111,7 +111,7 @@
 
     <!-- Payment methods donut (4 cols) -->
     <div class="col-span-12 lg:col-span-4 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-      <h3 class="text-base font-semibold text-gray-900 mb-5">Meios de pagamento</h3>
+      <h3 class="text-base font-semibold text-gray-900 mb-5">Payment methods</h3>
       <div class="flex justify-center">
         <div class="w-36 h-36 relative">
           <canvas id="paymentChart"></canvas>
@@ -124,7 +124,7 @@
     <div class="col-span-12 lg:col-span-6 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
       <h3 class="text-base font-semibold text-gray-900 mb-5 flex items-center gap-2">
         <i data-lucide="calendar-days" class="w-4 h-4 text-gray-400"></i>
-        Vendas por dia da semana
+        Sales by weekday
       </h3>
       <div class="h-44 relative">
         <canvas id="weekdayChart"></canvas>
@@ -134,13 +134,13 @@
     <!-- Low stock alerts (6 cols) -->
     <div class="col-span-12 lg:col-span-6 bg-white rounded-xl border border-gray-100 shadow-sm p-6 flex flex-col">
       <div class="flex justify-between items-center mb-5">
-        <h3 class="text-base font-semibold text-gray-900">Alertas de stock</h3>
+        <h3 class="text-base font-semibold text-gray-900">Stock alerts</h3>
         <span class="bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full" id="lowStockCount">0</span>
       </div>
       <div id="lowStockList" class="space-y-2 text-sm flex-1"></div>
       <div class="mt-4">
         <div class="flex justify-between text-xs text-gray-400 mb-1.5">
-          <span>Saúde do stock</span>
+          <span>Stock health</span>
           <span id="stockBarLabel"></span>
         </div>
         <div class="bg-gray-100 rounded-full h-1.5">
@@ -153,23 +153,23 @@
     <div class="col-span-12 lg:col-span-4 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
       <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
         <i data-lucide="award" class="w-4 h-4 text-gray-400"></i>
-        Funcionário em destaque
+        Top performer
       </h3>
       <div id="topAttendant" class="flex flex-col justify-center h-20">
         <p class="text-gray-400 text-sm">—</p>
       </div>
     </div>
 
-    <!-- Top products (destaques) (4 cols) -->
+    <!-- Top products (highlights) (4 cols) -->
     <div class="col-span-12 lg:col-span-4 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
       <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
         <i data-lucide="star" class="w-4 h-4 text-gray-400"></i>
-        Destaques
+        Highlights
       </h3>
       <div id="topProductsList" class="space-y-2 text-sm"></div>
       <a href="/{{ request.tenant.subdomain }}/history/"
         class="text-xs font-medium mt-4 inline-block hover:underline" style="color: var(--primary);">
-        Ver vendas →
+        View sales →
       </a>
     </div>
 
@@ -177,7 +177,7 @@
     <div class="col-span-12 lg:col-span-4 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
       <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
         <i data-lucide="trophy" class="w-4 h-4 text-gray-400"></i>
-        Top produtos do mês
+        Top products this month
       </h3>
       <div id="topProductsTable" class="space-y-2"></div>
     </div>
@@ -189,12 +189,20 @@
 
 {% block scripts %}
 <script>
-  const MONTHS = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-  const PAYMENT_COLORS = { "Dinheiro": "#22c55e", "M-Pesa": "#3b82f6", "E-Mola": "#f59e0b", "eMola": "#f59e0b", "Cartao": "#8b5cf6", "Transferencia": "#64748b", "POS": "#0ea5e9" };
+  const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const PAYMENT_COLORS = {
+    "Cash": "#22c55e",
+    "Credit Card": "#8b5cf6",
+    "PayPal": "#3b82f6",
+    "Venmo": "#14b8a6",
+    "Zelle": "#f59e0b",
+    "Dinheiro": "#22c55e", "M-Pesa": "#ef4444", "E-Mola": "#f59e0b",
+    "eMola": "#f59e0b", "Cartao": "#8b5cf6", "Transferencia": "#64748b", "POS": "#0ea5e9"
+  };
 
   let salesChartInst, paymentChartInst, weekdayChartInst;
 
-  function fmt(n) { return Number(n).toLocaleString("pt-MZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " MZN"; }
+  function fmt(n) { return "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
   async function loadDashboard() {
     const month = document.querySelector("#selMonth").value;
@@ -203,7 +211,7 @@
     const res = await fetch(`/${SLUG}/api/dashboard?month=${month}&year=${year}`);
     const d = await res.json();
 
-    document.querySelector("#monthLabel").textContent = `${MONTHS[d.month - 1]} de ${d.year}`;
+    document.querySelector("#monthLabel").textContent = `${MONTHS[d.month - 1]} ${d.year}`;
 
     function unskel(id, text) {
       const el = document.getElementById(id);
@@ -232,8 +240,8 @@
     document.querySelector("#topAttendant").innerHTML = ta
       ? `<p class="text-2xl font-bold text-gray-800">${escHtml(ta.name)}</p>
          <p class="text-sm text-gray-700 font-semibold mt-1">${fmt(ta.revenue)}</p>
-         <p class="text-xs text-gray-400 mt-0.5">${ta.count} venda${ta.count !== 1 ? 's' : ''}</p>`
-      : `<p class="text-gray-400 text-sm">Sem vendas registadas neste período</p>`;
+         <p class="text-xs text-gray-400 mt-0.5">${ta.count} sale${ta.count !== 1 ? 's' : ''}</p>`
+      : `<p class="text-gray-400 text-sm">No sales in this period</p>`;
 
     const labels = d.chart_data.map(x => x.day);
     const values = d.chart_data.map(x => x.revenue);
@@ -272,7 +280,7 @@
             cornerRadius: 8,
             displayColors: false,
             callbacks: {
-              title: ctx => `Dia ${ctx[0].label}`,
+              title: ctx => `Day ${ctx[0].label}`,
               label: ctx => fmt(ctx.parsed.y),
             }
           }
@@ -330,13 +338,13 @@
     const lowList = document.querySelector("#lowStockList");
     document.querySelector("#lowStockCount").textContent = d.low_stock.length;
     lowList.innerHTML = d.low_stock.length === 0
-      ? "<p class='text-gray-400 text-xs'>Nenhum produto em stock baixo ✓</p>"
+      ? "<p class='text-gray-400 text-xs'>No low-stock products ✓</p>"
       : d.low_stock.slice(0, 5).map(s => `
         <div class="flex justify-between items-center py-1.5">
           <span class="text-gray-700 truncate max-w-[60%]">${escHtml(s["product__name"])} ${escHtml(s.size || "")} ${escHtml(s.color || "")}</span>
           <span class="inline-flex items-center gap-1.5 flex-shrink-0">
             <span class="w-1.5 h-1.5 rounded-full ${s.current_stock === 0 ? "bg-red-400" : "bg-amber-400"}"></span>
-            <span class="text-xs text-gray-500">${s.current_stock === 0 ? "Esgotado" : s.current_stock + " un."}</span>
+            <span class="text-xs text-gray-500">${s.current_stock === 0 ? "Out of stock" : s.current_stock + " units"}</span>
           </span>
         </div>`).join("");
 
@@ -344,7 +352,7 @@
     const lowCount = d.low_stock.length;
     const pct = totalInv > 0 ? Math.min(100, Math.round((totalInv - lowCount) / totalInv * 100)) : 0;
     document.querySelector("#stockBar").style.width = pct + "%";
-    document.querySelector("#stockBarLabel").textContent = `${pct}% saudável`;
+    document.querySelector("#stockBarLabel").textContent = `${pct}% healthy`;
 
     document.querySelector("#topProductsList").innerHTML = d.top_products.slice(0, 5).map((p, i) =>
       `<div class="flex justify-between items-center text-sm gap-2">
@@ -354,9 +362,9 @@
           </span>
           <span class="text-gray-700 truncate">${escHtml(p.name)}</span>
         </span>
-        <span class="font-semibold text-gray-800 flex-shrink-0">${p.units} un.</span>
+        <span class="font-semibold text-gray-800 flex-shrink-0">${p.units} units</span>
       </div>`
-    ).join("") || "<p class='text-gray-400 text-xs'>Sem vendas neste período</p>";
+    ).join("") || "<p class='text-gray-400 text-xs'>No sales this period</p>";
     lucide.createIcons();
 
     document.querySelector("#topProductsTable").innerHTML = d.top_products.map(p =>
@@ -364,20 +372,21 @@
         <span class="text-gray-700 text-sm truncate max-w-[55%]">${escHtml(p.name)}</span>
         <div class="text-right">
           <p class="text-sm font-semibold text-gray-800">${fmt(p.revenue)}</p>
-          <p class="text-xs text-gray-400">${p.units} unidades</p>
+          <p class="text-xs text-gray-400">${p.units} units</p>
         </div>
       </div>`
-    ).join("") || "<p class='text-gray-400 text-sm'>Sem dados neste período</p>";
+    ).join("") || "<p class='text-gray-400 text-sm'>No data this period</p>";
 
     const payLabels = Object.keys(d.payment_breakdown);
     const payValues = payLabels.map(k => d.payment_breakdown[k].total);
-    const payColors = payLabels.map(k => PAYMENT_COLORS[k] || "#94a3b8");
+    const distinctColors = ["#22c55e","#8b5cf6","#3b82f6","#14b8a6","#f59e0b","#ef4444","#0ea5e9","#64748b"];
+    const payColors = payLabels.map((k, i) => PAYMENT_COLORS[k] || distinctColors[i % distinctColors.length]);
 
     if (paymentChartInst) paymentChartInst.destroy();
     if (payLabels.length > 0) {
       paymentChartInst = new Chart(document.querySelector("#paymentChart"), {
         type: "doughnut",
-        data: { labels: payLabels, datasets: [{ data: payValues, backgroundColor: payColors, borderWidth: 0 }] },
+        data: { labels: payLabels, datasets: [{ data: payValues, backgroundColor: payColors, borderWidth: 2, borderColor: "#fff" }] },
         options: {
           responsive: true, maintainAspectRatio: false, cutout: "70%",
           plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => fmt(ctx.parsed) } } }
@@ -394,7 +403,7 @@
         </div>`;
       }).join("");
     } else {
-      document.querySelector("#paymentLegend").innerHTML = "<p class='text-gray-400 text-xs'>Sem vendas neste período</p>";
+      document.querySelector("#paymentLegend").innerHTML = "<p class='text-gray-400 text-xs'>No sales this period</p>";
     }
   }
 

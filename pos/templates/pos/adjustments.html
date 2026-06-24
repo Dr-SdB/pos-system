@@ -1,8 +1,8 @@
 {% extends "pos/base.html" %}
 {% load static %}
-{% block title %}Ajustes & Catálogo{% endblock %}
+{% block title %}Adjustments & Catalogue{% endblock %}
 {% block nav_adjustments %}active{% endblock %}
-{% block page_title %}Ajustes & Alterações de Catálogo{% endblock %}
+{% block page_title %}Adjustments & Catalogue Changes{% endblock %}
 
 {% block content %}
 <div class="space-y-4">
@@ -11,11 +11,11 @@
   <div class="flex gap-2">
     <button onclick="switchTab('stock')" id="tabStock"
       class="tab-primary px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-1.5">
-      <i data-lucide="minus-circle" class="w-4 h-4"></i> Ajustes de Stock
+      <i data-lucide="minus-circle" class="w-4 h-4"></i> Stock Adjustments
     </button>
     <button onclick="switchTab('catalogue')" id="tabCatalogue"
       class="bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-1.5">
-      <i data-lucide="history" class="w-4 h-4"></i> Alterações de Catálogo
+      <i data-lucide="history" class="w-4 h-4"></i> Catalogue Changes
     </button>
   </div>
 
@@ -37,37 +37,37 @@
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
       <div class="flex flex-wrap gap-4 items-end">
         <div class="space-y-1.5">
-          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">De</label>
+          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">From</label>
           <div class="relative">
             <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
             <input type="date" id="adjFrom" class="pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-200" />
           </div>
         </div>
         <div class="space-y-1.5">
-          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Até</label>
+          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">To</label>
           <div class="relative">
             <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
             <input type="date" id="adjTo" class="pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-200" />
           </div>
         </div>
         <div class="space-y-1.5 flex-1 min-w-36">
-          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Motivo</label>
+          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Reason</label>
           <select id="adjReason" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-200 bg-white">
-            <option value="">Todos</option>
-            <option>Dano</option>
-            <option>Perda</option>
-            <option>Roubo</option>
-            <option>Outro</option>
+            <option value="">All</option>
+            <option value="Damage">Damage</option>
+            <option value="Loss">Loss</option>
+            <option value="Theft">Theft</option>
+            <option value="Other">Other</option>
           </select>
         </div>
         <div class="flex gap-2">
           <button onclick="loadAdjustments()" style="background:var(--primary)"
             class="px-4 py-2 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2">
-            <i data-lucide="filter" class="w-4 h-4"></i> Filtrar
+            <i data-lucide="filter" class="w-4 h-4"></i> Filter
           </button>
           <button onclick="clearAdjFilters()"
             class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium rounded-lg transition-colors">
-            Limpar
+            Clear
           </button>
         </div>
       </div>
@@ -79,12 +79,12 @@
         <table class="w-full text-sm">
           <thead>
             <tr class="bg-gray-50 border-b border-gray-100">
-              <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Produto</th>
+              <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Product</th>
               <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden sm:table-cell">SKU</th>
-              <th class="text-center px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Motivo</th>
-              <th class="text-right px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Qtd</th>
-              <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden md:table-cell">Utilizador</th>
-              <th class="text-right px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Data</th>
+              <th class="text-center px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Reason</th>
+              <th class="text-right px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Qty</th>
+              <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden md:table-cell">User</th>
+              <th class="text-right px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Date</th>
             </tr>
           </thead>
           <tbody id="adjTable" class="divide-y divide-gray-50">
@@ -103,7 +103,7 @@
       </div>
       <div id="adjEmpty" class="hidden text-center py-16 text-gray-400">
         <i data-lucide="clipboard-list" class="w-12 h-12 mx-auto mb-3 text-gray-300"></i>
-        <p class="text-sm">Nenhum ajuste encontrado.</p>
+        <p class="text-sm">No adjustments found.</p>
       </div>
     </div>
 
@@ -127,38 +127,38 @@
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
       <div class="flex flex-wrap gap-4 items-end">
         <div class="space-y-1.5">
-          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">De</label>
+          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">From</label>
           <div class="relative">
             <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
             <input type="date" id="catFrom" class="pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-200" />
           </div>
         </div>
         <div class="space-y-1.5">
-          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Até</label>
+          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">To</label>
           <div class="relative">
             <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
             <input type="date" id="catTo" class="pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-200" />
           </div>
         </div>
         <div class="space-y-1.5 flex-1 min-w-44">
-          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Tipo de alteração</label>
+          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Change type</label>
           <select id="catAction" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-200 bg-white">
-            <option value="">Todas</option>
-            <option>Preço alterado</option>
-            <option>Stock definido</option>
-            <option>Artigo eliminado</option>
-            <option>Nome alterado</option>
-            <option>Categoria alterada</option>
+            <option value="">All</option>
+            <option value="Preço alterado">Price changed</option>
+            <option value="Stock definido">Stock set</option>
+            <option value="Artigo eliminado">Item deleted</option>
+            <option value="Nome alterado">Name changed</option>
+            <option value="Categoria alterada">Category changed</option>
           </select>
         </div>
         <div class="flex gap-2">
           <button onclick="loadCatalogueHistory()" style="background:var(--primary)"
             class="px-4 py-2 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2">
-            <i data-lucide="filter" class="w-4 h-4"></i> Filtrar
+            <i data-lucide="filter" class="w-4 h-4"></i> Filter
           </button>
           <button onclick="clearCatFilters()"
             class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium rounded-lg transition-colors">
-            Limpar
+            Clear
           </button>
         </div>
       </div>
@@ -170,13 +170,13 @@
         <table class="w-full text-sm">
           <thead>
             <tr class="bg-gray-50 border-b border-gray-100">
-              <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Produto</th>
+              <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Product</th>
               <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden sm:table-cell">SKU</th>
-              <th class="text-center px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Alteração</th>
-              <th class="text-right px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden md:table-cell">Antes</th>
-              <th class="text-right px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden md:table-cell">Depois</th>
-              <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden lg:table-cell">Utilizador</th>
-              <th class="text-right px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Data</th>
+              <th class="text-center px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Change</th>
+              <th class="text-right px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden md:table-cell">Before</th>
+              <th class="text-right px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden md:table-cell">After</th>
+              <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden lg:table-cell">User</th>
+              <th class="text-right px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Date</th>
             </tr>
           </thead>
           <tbody id="catTable" class="divide-y divide-gray-50">
@@ -196,7 +196,7 @@
       </div>
       <div id="catEmpty" class="hidden text-center py-16 text-gray-400">
         <i data-lucide="history" class="w-12 h-12 mx-auto mb-3 text-gray-300"></i>
-        <p class="text-sm">Nenhuma alteração de catálogo encontrada.</p>
+        <p class="text-sm">No catalogue changes found.</p>
       </div>
     </div>
 
@@ -211,8 +211,13 @@
 </style>
 <script>
 const REASON_COLORS = {
-  Dano:"bg-orange-100 text-orange-700", Perda:"bg-yellow-100 text-yellow-700",
-  Roubo:"bg-red-100 text-red-700", Outro:"bg-gray-100 text-gray-500",
+  Damage:"bg-orange-100 text-orange-700", Loss:"bg-yellow-100 text-yellow-700",
+  Theft:"bg-red-100 text-red-700", Other:"bg-gray-100 text-gray-500",
+};
+const ACTION_LABELS = {
+  "Preço alterado":"Price changed", "Stock definido":"Stock set",
+  "Artigo eliminado":"Item deleted", "Nome alterado":"Name changed",
+  "Categoria alterada":"Category changed",
 };
 const ACTION_COLORS = {
   "Preço alterado":"bg-blue-100 text-blue-700",
@@ -227,8 +232,8 @@ function switchTab(tab) {
   document.querySelector("#panelCatalogue").classList.toggle("hidden", tab!=="catalogue");
   const inactive = "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-1.5";
   const active   = "tab-primary px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-1.5";
-  document.querySelector("#tabStock").className       = tab==="stock"      ? active : inactive;
-  document.querySelector("#tabCatalogue").className   = tab==="catalogue"  ? active : inactive;
+  document.querySelector("#tabStock").className     = tab==="stock"     ? active : inactive;
+  document.querySelector("#tabCatalogue").className = tab==="catalogue" ? active : inactive;
   if (tab === "catalogue") loadCatalogueHistory();
 }
 
@@ -241,46 +246,54 @@ async function loadAdjustments() {
   if (from)   params.set("from", from);
   if (to)     params.set("to", to);
   if (reason) params.set("reason", reason);
-  const res  = await fetch(`/${SLUG}/api/adjustments?${params}`);
+  const res  = await fetch(`/${SLUG}/api/adjustments/history?${params}`);
   const data = await res.json();
-  renderAdjStats(data.summary);
-  renderAdjTable(data.results);
+  renderAdjStats(data);
+  renderAdjTable(data.results || []);
 }
 
-function renderAdjStats(s) {
-  if (!s) return;
+function renderAdjStats(data) {
+  const rows = data.results || [];
+  const reasonCount = {};
+  const users = new Set();
+  rows.forEach(r => {
+    if (r.reason) reasonCount[r.reason] = (reasonCount[r.reason]||0) + 1;
+    if (r.adjusted_by) users.add(r.adjusted_by);
+  });
+  const topReason = Object.entries(reasonCount).sort((a,b)=>b[1]-a[1])[0];
+
   document.querySelector("#adjStockStats").innerHTML = `
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
       <div class="flex items-center justify-between mb-3">
-        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Total ajustes</p>
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Total Adjustments</p>
         <div class="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center"><i data-lucide="minus-circle" class="w-4 h-4 text-purple-500"></i></div>
       </div>
-      <p class="text-2xl font-bold text-gray-900">${s.total_adjustments||0}</p>
-      <p class="text-xs text-gray-400 mt-1">no período filtrado</p>
+      <p class="text-2xl font-bold text-gray-900">${data.total||0}</p>
+      <p class="text-xs text-gray-400 mt-1">in filtered period</p>
     </div>
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
       <div class="flex items-center justify-between mb-3">
-        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Unidades removidas</p>
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Units Removed</p>
         <div class="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center"><i data-lucide="trending-down" class="w-4 h-4 text-red-500"></i></div>
       </div>
-      <p class="text-2xl font-bold text-gray-900">${s.total_units||0}</p>
-      <p class="text-xs text-gray-400 mt-1">unidades em total</p>
+      <p class="text-2xl font-bold text-gray-900">${data.total_removed||0}</p>
+      <p class="text-xs text-gray-400 mt-1">units in total</p>
     </div>
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
       <div class="flex items-center justify-between mb-3">
-        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Motivo principal</p>
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Top Reason</p>
         <div class="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center"><i data-lucide="alert-circle" class="w-4 h-4 text-orange-500"></i></div>
       </div>
-      <p class="text-xl font-bold text-gray-900">${s.top_reason||"–"}</p>
-      <p class="text-xs text-gray-400 mt-1">mais frequente</p>
+      <p class="text-xl font-bold text-gray-900">${topReason ? topReason[0] : "–"}</p>
+      <p class="text-xs text-gray-400 mt-1">most common</p>
     </div>
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
       <div class="flex items-center justify-between mb-3">
-        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Utilizadores</p>
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Users</p>
         <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center"><i data-lucide="users" class="w-4 h-4 text-blue-500"></i></div>
       </div>
-      <p class="text-2xl font-bold text-gray-900">${s.unique_users||0}</p>
-      <p class="text-xs text-gray-400 mt-1">com registos</p>
+      <p class="text-2xl font-bold text-gray-900">${users.size}</p>
+      <p class="text-xs text-gray-400 mt-1">with records</p>
     </div>
   `;
   lucide.createIcons();
@@ -297,16 +310,16 @@ function renderAdjTable(rows) {
     tr.className = "hover:bg-gray-50 transition-colors";
     tr.innerHTML = `
       <td class="px-5 py-3.5">
-        <p class="font-medium text-gray-800 text-sm">${escHtml(r.product_name)}</p>
+        <p class="font-medium text-gray-800 text-sm">${escHtml(r.product_name||"")}</p>
         ${r.size||r.color?`<p class="text-xs text-gray-400 mt-0.5">${[r.size,r.color].filter(Boolean).join(' · ')}</p>`:""}
       </td>
       <td class="px-5 py-3.5 font-mono text-xs text-gray-400 hidden sm:table-cell">${escHtml(r.variant_sku||"–")}</td>
       <td class="px-5 py-3.5 text-center">
-        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${badgeCls}">${escHtml(r.reason)}</span>
+        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${badgeCls}">${escHtml(r.reason||"–")}</span>
       </td>
-      <td class="px-5 py-3.5 text-right font-semibold text-red-600 text-sm">−${r.quantity}</td>
+      <td class="px-5 py-3.5 text-right font-semibold text-red-600 text-sm">−${r.quantity||0}</td>
       <td class="px-5 py-3.5 text-sm text-gray-500 hidden md:table-cell">${escHtml(r.adjusted_by||"–")}</td>
-      <td class="px-5 py-3.5 text-right text-xs text-gray-400 whitespace-nowrap">${r.created_at}</td>
+      <td class="px-5 py-3.5 text-right text-xs text-gray-400 whitespace-nowrap">${r.created_at||"–"}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -332,46 +345,46 @@ async function loadCatalogueHistory() {
   const res  = await fetch(`/${SLUG}/api/catalogue/history?${params}`);
   const data = await res.json();
   renderCatStats(data);
-  renderCatTable(data.results);
+  renderCatTable(data.results || []);
 }
 
 function renderCatStats(data) {
   const rows = data.results || [];
   const byAction = {};
   rows.forEach(r => { byAction[r.action] = (byAction[r.action]||0) + 1; });
-  const editors = [...new Set(rows.map(r=>r.changed_by))].length;
+  const editors = [...new Set(rows.map(r=>r.changed_by).filter(Boolean))].length;
   document.querySelector("#catStatsRow").innerHTML = `
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
       <div class="flex items-center justify-between mb-3">
-        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Total de alterações</p>
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Total Changes</p>
         <div class="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center"><i data-lucide="history" class="w-4 h-4 text-purple-500"></i></div>
       </div>
       <p class="text-2xl font-bold text-gray-900">${data.total||0}</p>
-      <p class="text-xs text-gray-400 mt-1">no período filtrado</p>
+      <p class="text-xs text-gray-400 mt-1">in filtered period</p>
     </div>
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
       <div class="flex items-center justify-between mb-3">
-        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Preços alterados</p>
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Price Changes</p>
         <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center"><i data-lucide="tag" class="w-4 h-4 text-blue-500"></i></div>
       </div>
       <p class="text-2xl font-bold text-gray-900">${byAction["Preço alterado"]||0}</p>
-      <p class="text-xs text-gray-400 mt-1">no período</p>
+      <p class="text-xs text-gray-400 mt-1">in period</p>
     </div>
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
       <div class="flex items-center justify-between mb-3">
-        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Eliminações</p>
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Deletions</p>
         <div class="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center"><i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i></div>
       </div>
       <p class="text-2xl font-bold text-gray-900">${byAction["Artigo eliminado"]||0}</p>
-      <p class="text-xs text-gray-400 mt-1">artigos removidos</p>
+      <p class="text-xs text-gray-400 mt-1">items removed</p>
     </div>
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
       <div class="flex items-center justify-between mb-3">
-        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Editores</p>
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Editors</p>
         <div class="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center"><i data-lucide="users" class="w-4 h-4 text-green-500"></i></div>
       </div>
       <p class="text-2xl font-bold text-gray-900">${editors}</p>
-      <p class="text-xs text-gray-400 mt-1">utilizadores activos</p>
+      <p class="text-xs text-gray-400 mt-1">active users</p>
     </div>
   `;
   lucide.createIcons();
@@ -384,18 +397,19 @@ function renderCatTable(rows) {
   document.querySelector("#catEmpty").classList.add("hidden");
   rows.forEach(r => {
     const badgeCls = ACTION_COLORS[r.action]||"bg-gray-100 text-gray-500";
+    const label    = ACTION_LABELS[r.action] || r.action;
     const tr = document.createElement("tr");
     tr.className = "hover:bg-gray-50 transition-colors";
     tr.innerHTML = `
-      <td class="px-5 py-3.5 font-medium text-gray-800 text-sm">${escHtml(r.product_name)}</td>
-      <td class="px-5 py-3.5 font-mono text-xs text-gray-400 hidden sm:table-cell">${escHtml(r.variant_sku)}</td>
+      <td class="px-5 py-3.5 font-medium text-gray-800 text-sm">${escHtml(r.product_name||"")}</td>
+      <td class="px-5 py-3.5 font-mono text-xs text-gray-400 hidden sm:table-cell">${escHtml(r.variant_sku||"")}</td>
       <td class="px-5 py-3.5 text-center">
-        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${badgeCls}">${escHtml(r.action)}</span>
+        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${badgeCls}">${escHtml(label)}</span>
       </td>
       <td class="px-5 py-3.5 text-right text-sm text-gray-500 hidden md:table-cell">${escHtml(r.old_value||"–")}</td>
       <td class="px-5 py-3.5 text-right text-sm font-medium text-gray-800 hidden md:table-cell">${escHtml(r.new_value||"–")}</td>
-      <td class="px-5 py-3.5 text-sm text-gray-500 hidden lg:table-cell">${escHtml(r.changed_by)}</td>
-      <td class="px-5 py-3.5 text-right text-xs text-gray-400 whitespace-nowrap">${r.created_at}</td>
+      <td class="px-5 py-3.5 text-sm text-gray-500 hidden lg:table-cell">${escHtml(r.changed_by||"")}</td>
+      <td class="px-5 py-3.5 text-right text-xs text-gray-400 whitespace-nowrap">${r.created_at||"–"}</td>
     `;
     tbody.appendChild(tr);
   });
