@@ -139,3 +139,38 @@ class StockAdjustment(models.Model):
 
     def __str__(self):
         return f"{'+' if self.quantity > 0 else ''}{self.quantity} x {self.product_variant} ({self.reason})"
+
+
+class CatalogueChangeLog(models.Model):
+    ACTION_PRICE    = "Preço alterado"
+    ACTION_STOCK    = "Stock definido"
+    ACTION_DELETE   = "Artigo eliminado"
+    ACTION_NAME     = "Nome alterado"
+    ACTION_CATEGORY = "Categoria alterada"
+
+    ACTION_CHOICES = [
+        (ACTION_PRICE,    "Preço alterado"),
+        (ACTION_STOCK,    "Stock definido"),
+        (ACTION_DELETE,   "Artigo eliminado"),
+        (ACTION_NAME,     "Nome alterado"),
+        (ACTION_CATEGORY, "Categoria alterada"),
+    ]
+
+    tenant          = models.ForeignKey(Tenant, on_delete=models.CASCADE, null=True, blank=True)
+    product_variant = models.ForeignKey(
+        ProductVariant, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="catalogue_logs"
+    )
+    variant_sku  = models.CharField(max_length=80)
+    product_name = models.CharField(max_length=255)
+    action       = models.CharField(max_length=30, choices=ACTION_CHOICES)
+    old_value    = models.CharField(max_length=255, blank=True)
+    new_value    = models.CharField(max_length=255, blank=True)
+    changed_by   = models.CharField(max_length=150)
+    created_at   = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.action} — {self.variant_sku} by {self.changed_by}"

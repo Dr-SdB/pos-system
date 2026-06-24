@@ -1,73 +1,121 @@
 {% extends "pos/base.html" %}
 {% load static %}
-{% block title %}Sales History{% endblock %}
+{% block title %}Vendas / Relatórios{% endblock %}
 {% block nav_history %}active{% endblock %}
-{% block page_title %}Sales History{% endblock %}
+{% block page_title %}Lista de vendas{% endblock %}
 
 {% block header_actions %}
-  <button onclick="exportCSV()" class="text-sm px-3 py-1.5 border rounded-lg hover:bg-gray-50 transition-colors">
-    <span style="display:inline-flex;align-items:center;gap:6px;">
-      <i data-lucide="download" style="width:14px;height:14px;stroke-width:2;"></i> Export CSV
-    </span>
+  <button onclick="exportCSV()" class="text-sm px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-1.5 text-gray-600">
+    <i data-lucide="download" class="w-4 h-4"></i> Exportar CSV
   </button>
 {% endblock %}
 
 {% block content %}
-<div class="space-y-5">
+<div class="space-y-4">
 
-  <!-- Stats skeleton → filled by JS -->
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="historyStats">
-    <div class="bg-white rounded-xl border shadow-sm p-4"><span class="skeleton block w-24 h-7 mb-1"></span><span class="skeleton block w-16 h-3"></span></div>
-    <div class="bg-white rounded-xl border shadow-sm p-4"><span class="skeleton block w-28 h-7 mb-1"></span><span class="skeleton block w-20 h-3"></span></div>
-    <div class="bg-white rounded-xl border shadow-sm p-4"><span class="skeleton block w-28 h-7 mb-1"></span><span class="skeleton block w-16 h-3"></span></div>
-    <div class="bg-white rounded-xl border shadow-sm p-4"><span class="skeleton block w-20 h-7 mb-1"></span><span class="skeleton block w-20 h-3"></span></div>
+  <!-- Stats -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="historyStats">
+    {% for i in "abcd" %}
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div class="skel h-6 w-20 mb-2"></div>
+      <div class="skel h-3 w-28"></div>
+    </div>
+    {% endfor %}
   </div>
 
   <!-- Filters -->
-  <div class="bg-white rounded-xl border shadow-sm p-4 flex flex-wrap gap-3 items-end">
-    <div>
-      <label class="block text-xs font-medium text-gray-500 mb-1">From</label>
-      <input type="date" id="filterFrom" class="p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+    <div class="flex flex-wrap gap-4 items-end">
+      <div class="space-y-1.5">
+        <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">De</label>
+        <div class="relative">
+          <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
+          <input type="date" id="filterFrom"
+            class="pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-200 focus:border-purple-400" />
+        </div>
+      </div>
+      <div class="space-y-1.5">
+        <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Até</label>
+        <div class="relative">
+          <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
+          <input type="date" id="filterTo"
+            class="pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-200 focus:border-purple-400" />
+        </div>
+      </div>
+      <div class="space-y-1.5 flex-1 min-w-48">
+        <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Produto / SKU</label>
+        <div class="relative">
+          <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
+          <input type="text" id="filterProduct" placeholder="Ex: Calças, CIN-001…"
+            class="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-200 focus:border-purple-400" />
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="applyFilter()" style="background:var(--primary)"
+          class="px-4 py-2 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2">
+          <i data-lucide="filter" class="w-4 h-4"></i> Filtrar
+        </button>
+        <button onclick="clearFilter()"
+          class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium rounded-lg transition-colors">
+          Limpar
+        </button>
+      </div>
     </div>
-    <div>
-      <label class="block text-xs font-medium text-gray-500 mb-1">To</label>
-      <input type="date" id="filterTo" class="p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
-    </div>
-    <div class="flex-1 min-w-36">
-      <label class="block text-xs font-medium text-gray-500 mb-1">Product / SKU</label>
-      <input type="text" id="filterProduct" placeholder="E.g. Jeans, CIN-001…"
-        class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
-    </div>
-    <button onclick="applyFilter()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors">Filter</button>
-    <button onclick="clearFilter()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors">Clear</button>
   </div>
 
   <!-- Truncation notice -->
-  <div id="salesTruncNotice" class="hidden bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-700">
-    Showing the last <span id="salesShowing"></span> of <span id="salesTotalCount"></span> sales. Use date filters to refine.
+  <div id="salesTruncNotice" class="hidden bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-700 flex items-center gap-2">
+    <i data-lucide="alert-triangle" class="w-4 h-4 flex-shrink-0"></i>
+    A mostrar as últimas <span id="salesShowing" class="font-semibold mx-1"></span> de <span id="salesTotalCount" class="font-semibold mx-1"></span> vendas. Use os filtros de data para refinar.
   </div>
 
-  <!-- Sales list skeleton → replaced by JS -->
+  <!-- Sales list -->
   <div id="salesList" class="space-y-2">
-    <div class="bg-white rounded-xl border shadow-sm p-5"><span class="skeleton block w-40 h-5 mb-2"></span><span class="skeleton block w-56 h-3"></span></div>
-    <div class="bg-white rounded-xl border shadow-sm p-5"><span class="skeleton block w-36 h-5 mb-2"></span><span class="skeleton block w-48 h-3"></span></div>
-    <div class="bg-white rounded-xl border shadow-sm p-5"><span class="skeleton block w-44 h-5 mb-2"></span><span class="skeleton block w-52 h-3"></span></div>
+    {% for i in "abc" %}
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="skel w-9 h-9 rounded-xl"></div>
+        <div class="space-y-2">
+          <div class="skel h-4 w-28"></div>
+          <div class="skel h-3 w-48"></div>
+        </div>
+      </div>
+      <div class="skel h-5 w-20 ml-auto"></div>
+    </div>
+    {% endfor %}
   </div>
+
   <div id="salesEmpty" class="hidden text-center py-16 text-gray-400">
-    <i data-lucide="clipboard" style="width:48px;height:48px;margin:0 auto 12px;color:#d1d5db;"></i>
-    <p class="text-lg font-medium">No sales found</p>
+    <i data-lucide="clipboard-list" class="w-12 h-12 mx-auto mb-3 text-gray-300"></i>
+    <p class="text-sm font-medium">Nenhuma venda encontrada</p>
   </div>
+
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-const PAYMENT_ICONS = { Cash:"💵","M-Pesa":"📱","E-Mola":"📱","eMola":"📱",Card:"💳",Transfer:"🏦",POS:"💳" };
-const WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-function mzn(n) { return Number(n).toLocaleString("pt-MZ",{minimumFractionDigits:2,maximumFractionDigits:2})+" MZN"; }
+const PAYMENT_LUCIDE = {
+  Dinheiro:"banknote", "M-Pesa":"smartphone", "E-Mola":"smartphone",
+  "eMola":"smartphone", Cartao:"credit-card", Transferencia:"building-2", POS:"credit-card"
+};
+const PAYMENT_COLOR = {
+  Dinheiro:"text-green-600 bg-green-50", "M-Pesa":"text-red-500 bg-red-50",
+  "E-Mola":"text-yellow-600 bg-yellow-50", "eMola":"text-yellow-600 bg-yellow-50",
+  Cartao:"text-blue-600 bg-blue-50", Transferencia:"text-gray-600 bg-gray-100",
+  POS:"text-purple-600 bg-purple-50"
+};
+
+function paymentIcon(method, cls="w-4 h-4") {
+  const name = PAYMENT_LUCIDE[method] || "wallet";
+  return `<i data-lucide="${name}" class="${cls}"></i>`;
+}
+const WEEKDAYS_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+function mzn(n) { return Number(n).toLocaleString("pt-MZ",{minimumFractionDigits:2,maximumFractionDigits:2}) + " MZN"; }
 function fmtDate(s) {
-  const d = new Date(s.replace(' ','T'));
-  return `${WEEKDAYS[d.getDay()]}, ${String(d.getDate()).padStart(2,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${d.getFullYear()} ${s.slice(11)}`;
+  const day=s.slice(0,2), month=s.slice(3,5), year=s.slice(6,10), time=s.slice(11);
+  const d = new Date(`${year}-${month}-${day}T${time}`);
+  return { date:`${WEEKDAYS_PT[d.getDay()]} ${day}/${month}/${year}`, time };
 }
 
 let currentFrom="", currentTo="", currentProduct="";
@@ -75,7 +123,7 @@ let currentFrom="", currentTo="", currentProduct="";
 async function loadHistory() {
   const params = new URLSearchParams();
   if (currentFrom) params.set("from", currentFrom);
-  if (currentTo)   params.set("to", currentTo);
+  if (currentTo) params.set("to", currentTo);
   if (currentProduct) params.set("product", currentProduct);
   const res = await fetch(`/${SLUG}/api/sales?${params}`);
   const data = await res.json();
@@ -84,27 +132,51 @@ async function loadHistory() {
 
 function renderHistory({ sales, summary }) {
   const byMethod = {};
-  sales.forEach(s => { byMethod[s.payment_method] = (byMethod[s.payment_method]||0)+s.total; });
+  sales.forEach(s => { byMethod[s.payment_method] = (byMethod[s.payment_method]||0) + s.total; });
   const topMethod = Object.entries(byMethod).sort((a,b)=>b[1]-a[1])[0];
-  const avg = summary.total_sales>0 ? summary.total_revenue/summary.total_sales : 0;
+  const avg = summary.total_sales > 0 ? summary.total_revenue / summary.total_sales : 0;
+  const colorCls = topMethod ? (PAYMENT_COLOR[topMethod[0]] || "text-gray-600 bg-gray-100") : "text-gray-600 bg-gray-100";
 
-  // Neutral data values in stats
   document.querySelector("#historyStats").innerHTML = `
-    <div class="bg-white rounded-xl border shadow-sm p-4">
-      <p class="text-2xl font-bold text-gray-800">${summary.total_sales}</p>
-      <p class="text-xs text-gray-500 mt-0.5">Total sales</p>
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Total de vendas</p>
+        <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
+          <i data-lucide="shopping-bag" class="w-4 h-4 text-blue-500"></i>
+        </div>
+      </div>
+      <p class="text-2xl font-bold text-gray-900">${summary.total_sales}</p>
+      <p class="text-xs text-gray-400 mt-1">no período filtrado</p>
     </div>
-    <div class="bg-white rounded-xl border shadow-sm p-4">
-      <p class="text-xl font-bold text-gray-800">${mzn(summary.total_revenue)}</p>
-      <p class="text-xs text-gray-500 mt-0.5">Total revenue</p>
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Receita total</p>
+        <div class="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center">
+          <i data-lucide="trending-up" class="w-4 h-4 text-green-500"></i>
+        </div>
+      </div>
+      <p class="text-lg font-bold text-gray-900 leading-tight">${mzn(summary.total_revenue)}</p>
+      <p class="text-xs text-gray-400 mt-1">valor acumulado</p>
     </div>
-    <div class="bg-white rounded-xl border shadow-sm p-4">
-      <p class="text-xl font-bold text-gray-800">${mzn(avg)}</p>
-      <p class="text-xs text-gray-500 mt-0.5">Avg. ticket</p>
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Ticket médio</p>
+        <div class="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center">
+          <i data-lucide="receipt" class="w-4 h-4 text-purple-500"></i>
+        </div>
+      </div>
+      <p class="text-lg font-bold text-gray-900 leading-tight">${mzn(avg)}</p>
+      <p class="text-xs text-gray-400 mt-1">por venda</p>
     </div>
-    <div class="bg-white rounded-xl border shadow-sm p-4">
-      <p class="text-xl font-bold text-gray-800">${topMethod?(PAYMENT_ICONS[topMethod[0]]||"")+" "+topMethod[0]:"–"}</p>
-      <p class="text-xs text-gray-500 mt-0.5">Top payment</p>
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Principal pagamento</p>
+        <div class="w-9 h-9 rounded-lg ${colorCls.split(' ')[1]} flex items-center justify-center">
+          ${topMethod ? paymentIcon(topMethod[0], `w-4 h-4 ${colorCls.split(' ')[0]}`) : `<i data-lucide="wallet" class="w-4 h-4 text-gray-400"></i>`}
+        </div>
+      </div>
+      <p class="text-xl font-bold text-gray-900">${topMethod ? topMethod[0] : "–"}</p>
+      <p class="text-xs text-gray-400 mt-1">método mais usado</p>
     </div>
   `;
 
@@ -113,119 +185,125 @@ function renderHistory({ sales, summary }) {
 
   const notice = document.querySelector("#salesTruncNotice");
   if (summary.showing < summary.total_sales) {
-    document.querySelector("#salesShowing").textContent  = summary.showing;
+    document.querySelector("#salesShowing").textContent = summary.showing;
     document.querySelector("#salesTotalCount").textContent = summary.total_sales;
     notice.classList.remove("hidden");
   } else {
     notice.classList.add("hidden");
   }
 
-  if (!sales.length) { document.querySelector("#salesEmpty").classList.remove("hidden"); if (window.lucide) lucide.createIcons(); return; }
+  if (!sales.length) { document.querySelector("#salesEmpty").classList.remove("hidden"); lucide.createIcons(); return; }
   document.querySelector("#salesEmpty").classList.add("hidden");
 
   sales.forEach(sale => {
+    const totalDisc = (sale.discount || 0) + (sale.flat_discount || 0);
+    const { date, time } = fmtDate(sale.created_at);
+    const iconColorCls = PAYMENT_COLOR[sale.payment_method] || "text-gray-600 bg-gray-100";
     const card = document.createElement("div");
-    card.className = "bg-white rounded-xl border shadow-sm overflow-hidden";
+    card.className = "bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden";
     card.innerHTML = `
-      <div class="flex items-center justify-between px-5 py-4 cursor-pointer select-none hover:bg-gray-50 transition-colors" data-toggle>
-        <div class="flex items-center gap-3">
-          <span class="text-xl">${PAYMENT_ICONS[sale.payment_method]||"💰"}</span>
-          <div>
-            <p class="font-semibold text-gray-800">Sale #${sale.id}</p>
-            <p class="text-xs text-gray-400">${fmtDate(sale.created_at)} · ${sale.payment_method} · ${sale.location||"Store"} · ${sale.items.length} item${sale.items.length!==1?"s":""}${sale.customer_name?" · "+escHtml(sale.customer_name):""}</p>
+      <div class="flex items-center gap-4 px-5 py-4 cursor-pointer select-none hover:bg-gray-50 transition-colors" data-toggle>
+        <div class="w-10 h-10 rounded-xl ${iconColorCls} flex items-center justify-center flex-shrink-0">
+          ${paymentIcon(sale.payment_method, "w-5 h-5")}
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2">
+            <p class="font-semibold text-gray-800 text-sm">Venda #${sale.id}</p>
+            <span class="text-[11px] font-medium text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">${sale.items.length} artigo${sale.items.length!==1?"s":""}</span>
           </div>
+          <p class="text-xs text-gray-400 mt-0.5 truncate">${date} ${time} · ${sale.payment_method}${sale.location?" · "+sale.location:""}${sale.customer_name?" · "+sale.customer_name:""}</p>
         </div>
-        <div class="text-right">
-          <p class="font-bold text-gray-800">${mzn(sale.total)}</p>
-          ${sale.discount>0?`<p class="text-xs text-gray-400">−${mzn(sale.discount)} disc.</p>`:""}
+        <div class="text-right flex-shrink-0">
+          <p class="font-bold text-gray-800 text-sm">${mzn(sale.total)}</p>
+          ${totalDisc>0?`<p class="text-xs text-red-400">−${mzn(totalDisc)} desc.</p>`:""}
         </div>
+        <i data-lucide="chevron-down" class="w-4 h-4 text-gray-300 flex-shrink-0 transition-transform duration-200" data-chevron></i>
       </div>
-      <div class="border-t hidden" data-detail>
+      <div class="border-t border-gray-100 hidden" data-detail>
         <table class="w-full text-sm">
           <thead class="bg-gray-50">
             <tr>
-              <th class="text-left px-5 py-2 text-xs font-semibold text-gray-400">Product</th>
-              <th class="text-center px-3 py-2 text-xs font-semibold text-gray-400">Qty</th>
-              <th class="text-right px-3 py-2 text-xs font-semibold text-gray-400">Unit</th>
-              <th class="text-right px-5 py-2 text-xs font-semibold text-gray-400">Total</th>
+              <th class="text-left px-5 py-2.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Produto</th>
+              <th class="text-center px-3 py-2.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Qtd</th>
+              <th class="text-right px-3 py-2.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Unit.</th>
+              <th class="text-right px-5 py-2.5 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Total</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody class="divide-y divide-gray-50">
             ${sale.items.map(i=>`
-              <tr class="border-t border-gray-50">
-                <td class="px-5 py-2 text-gray-700">${escHtml(i.product_name)}${i.size?" · "+escHtml(i.size):""}${i.color?" · "+escHtml(i.color):""}</td>
-                <td class="px-3 py-2 text-center text-gray-500">${i.quantity}</td>
-                <td class="px-3 py-2 text-right text-gray-500">${mzn(i.unit_price)}</td>
-                <td class="px-5 py-2 text-right font-medium">${mzn(i.line_total)}</td>
+              <tr>
+                <td class="px-5 py-3 text-gray-700 text-sm">${i.product_name}${i.size?" · <span class='text-gray-400'>"+i.size+"</span>":""}${i.color?" · <span class='text-gray-400'>"+i.color+"</span>":""}</td>
+                <td class="px-3 py-3 text-center text-gray-500">${i.quantity}</td>
+                <td class="px-3 py-3 text-right text-gray-500">${mzn(i.unit_price)}</td>
+                <td class="px-5 py-3 text-right font-semibold text-gray-800">${mzn(i.line_total)}</td>
               </tr>`).join("")}
           </tbody>
         </table>
-        <div class="px-5 py-3 bg-gray-50 flex flex-wrap justify-between gap-2 text-sm">
-          <span class="text-gray-500">
-            Location: <b>${sale.location||"Store"}</b>
-            ${sale.attendant?" · Attendant: <b>"+escHtml(sale.attendant)+"</b>":""}
-            ${" · "}Received: <b>${mzn(sale.amount_paid)}</b>
-            ${sale.change>0?" · Change: <b class='text-green-600'>"+mzn(sale.change)+"</b>":""}
-          </span>
+        <div class="px-5 py-3.5 bg-gray-50 border-t border-gray-100 flex flex-wrap justify-between items-center gap-3">
+          <div class="text-xs text-gray-500 space-x-3">
+            ${sale.location?`<span>Local: <b class="text-gray-700">${sale.location}</b></span>`:""}
+            ${sale.attendant?`<span>Atendente: <b class="text-gray-700">${sale.attendant}</b></span>`:""}
+            ${totalDisc>0?`<span>Desconto: <b class="text-red-500">−${mzn(totalDisc)}</b></span>`:""}
+            <span>Recebido: <b class="text-gray-700">${mzn(sale.amount_paid)}</b></span>
+            ${sale.change>0?`<span>Troco: <b class="text-gray-700">${mzn(sale.change)}</b></span>`:""}
+          </div>
           <div class="flex items-center gap-3">
-            <span class="font-bold text-gray-800">Total: ${mzn(sale.total)}</span>
+            <span class="font-bold text-gray-800 text-sm">Total: ${mzn(sale.total)}</span>
             <button onclick="voidSale(${sale.id}, this)"
-              class="text-xs px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors border border-red-200">
-              <span style="display:inline-flex;align-items:center;gap:4px;">
-                <i data-lucide="trash-2" style="width:12px;height:12px;stroke-width:2;"></i> Void
-              </span>
+              class="text-xs px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors border border-red-200 inline-flex items-center gap-1.5">
+              <i data-lucide="trash-2" class="w-3 h-3"></i> Anular
             </button>
           </div>
         </div>
       </div>
     `;
-    card.querySelector("[data-toggle]").addEventListener("click", () => {
-      card.querySelector("[data-detail]").classList.toggle("hidden");
+    const toggle = card.querySelector("[data-toggle]");
+    const detail = card.querySelector("[data-detail]");
+    const chevron = card.querySelector("[data-chevron]");
+    toggle.addEventListener("click", () => {
+      const open = detail.classList.toggle("hidden");
+      chevron.style.transform = open ? "" : "rotate(180deg)";
     });
     list.appendChild(card);
   });
-
-  if (window.lucide) lucide.createIcons();
+  lucide.createIcons();
 }
 
 function applyFilter() {
-  currentFrom    = document.querySelector("#filterFrom").value;
-  currentTo      = document.querySelector("#filterTo").value;
+  currentFrom = document.querySelector("#filterFrom").value;
+  currentTo = document.querySelector("#filterTo").value;
   currentProduct = document.querySelector("#filterProduct").value.trim();
   loadHistory();
 }
 function clearFilter() {
-  currentFrom = ""; currentTo = ""; currentProduct = "";
-  document.querySelector("#filterFrom").value = "";
-  document.querySelector("#filterTo").value   = "";
-  document.querySelector("#filterProduct").value = "";
+  currentFrom=""; currentTo=""; currentProduct="";
+  document.querySelector("#filterFrom").value="";
+  document.querySelector("#filterTo").value="";
+  document.querySelector("#filterProduct").value="";
   loadHistory();
 }
 
 async function voidSale(saleId, btn) {
-  if (!confirm(`Void sale #${saleId}? Stock will be restored. This action cannot be undone.`)) return;
-  btn.disabled = true; btn.textContent = "Voiding…";
+  if (!confirm(`Anular venda #${saleId}? O stock será reposto. Esta ação não pode ser desfeita.`)) return;
+  btn.disabled=true; btn.textContent="A anular…";
   try {
     const res = await fetch(`/${SLUG}/api/sales/${saleId}/void`, { method:"DELETE", headers:csrfHeaders() });
     const data = await res.json();
     if (!res.ok) {
-      showToast("Error: " + (data.error || "Unknown error"), "error");
-      btn.disabled = false; btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:4px;"><i data-lucide="trash-2" style="width:12px;height:12px;stroke-width:2;"></i> Void</span>';
-      if (window.lucide) lucide.createIcons();
-      return;
+      showToast("Erro: " + (data.error||"Erro desconhecido"), 'red');
+      btn.disabled=false; btn.innerHTML='<i data-lucide="trash-2" class="w-3 h-3"></i> Anular'; lucide.createIcons(); return;
     }
     loadHistory();
   } catch {
-    showToast("Network error. Try again.", "error");
-    btn.disabled = false; btn.innerHTML = '<span style="display:inline-flex;align-items:center;gap:4px;"><i data-lucide="trash-2" style="width:12px;height:12px;stroke-width:2;"></i> Void</span>';
-    if (window.lucide) lucide.createIcons();
+    showToast("Erro de rede. Tente novamente.", 'red');
+    btn.disabled=false; btn.innerHTML='<i data-lucide="trash-2" class="w-3 h-3"></i> Anular'; lucide.createIcons();
   }
 }
 
 function exportCSV() {
   const params = new URLSearchParams();
   if (currentFrom) params.set("from", currentFrom);
-  if (currentTo)   params.set("to", currentTo);
+  if (currentTo) params.set("to", currentTo);
   window.location.href = `/${SLUG}/api/sales/export?${params}`;
 }
 

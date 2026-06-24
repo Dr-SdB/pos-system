@@ -1,149 +1,232 @@
 {% extends "pos/base.html" %}
-{% block title %}Employees{% endblock %}
+{% load static %}
+{% block title %}Colaboradores{% endblock %}
 {% block nav_employees %}active{% endblock %}
-{% block page_title %}Employees{% endblock %}
+{% block page_title %}Colaboradores{% endblock %}
+
+{% block header_actions %}
+{% if request.user.is_superuser or request.user.userprofile.role == "manager" %}
+  <button onclick="openCreateModal()"
+    class="text-sm px-4 py-1.5 text-white rounded-lg font-medium transition-colors flex items-center gap-1.5"
+    style="background-color: var(--primary);">
+    <i data-lucide="user-plus" class="w-4 h-4"></i> Novo colaborador
+  </button>
+{% endif %}
+{% endblock %}
 
 {% block content %}
-<div class="max-w-3xl mx-auto space-y-6">
-
-  {% if success %}
-  <div class="bg-green-50 border border-green-200 rounded-2xl p-5">
-    <p class="font-semibold text-green-800 mb-2">
-      {% if success.reset %}✅ Password updated successfully!{% else %}✅ Employee created successfully!{% endif %}
-    </p>
-    <div class="bg-white rounded-xl border border-green-100 p-4 font-mono text-sm space-y-1">
-      <p><span class="text-gray-400">Username:</span> {{ success.username }}</p>
-      <p><span class="text-gray-400">Password:</span> <strong class="text-green-700">{{ success.password }}</strong></p>
-    </div>
-    <p class="text-xs text-gray-400 mt-2">Share these credentials with the employee.</p>
-  </div>
-  {% endif %}
-
-  {% if error %}
-  <div class="bg-red-50 border border-red-200 text-red-700 rounded-2xl px-5 py-4 text-sm">⚠️ {{ error }}</div>
-  {% endif %}
-
-  <!-- Add employee form -->
-  <div class="bg-white rounded-2xl border shadow-sm p-6">
-    <h2 class="font-bold text-gray-800 text-base mb-4">Add employee</h2>
-    <form method="post" class="space-y-4">
-      {% csrf_token %}
-      <input type="hidden" name="action" value="create" />
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-xs font-medium text-gray-500 mb-1">Full name</label>
-          <input name="full_name" placeholder="E.g. John Smith"
-            class="w-full p-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-500 mb-1">Username * <span class="text-gray-400">(for login)</span></label>
-          <input name="username" required placeholder="e.g. john.smith"
-            class="w-full p-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
-        </div>
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-gray-500 mb-1">Password *</label>
-        <div class="flex gap-2">
-          <input id="create-pwd" name="password" type="text" required placeholder="Click Generate or type manually"
-            class="flex-1 p-2.5 border rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-purple-300" />
-          <button type="button" onclick="genPwd('create-pwd')"
-            class="px-3 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 font-medium text-sm rounded-xl transition-colors whitespace-nowrap">
-            Generate
-          </button>
-        </div>
-      </div>
-      <button type="submit"
-        class="w-full bg-slate-800 hover:bg-slate-700 text-white font-semibold py-2.5 rounded-xl transition-colors text-sm">
-        Create employee
-      </button>
-    </form>
-  </div>
+<div class="space-y-4">
 
   <!-- Employee list -->
-  <div class="bg-white rounded-2xl border shadow-sm overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-      <h2 class="font-bold text-gray-800">Team</h2>
-      <span class="text-xs text-gray-400">{{ employees|length }} employee{{ employees|length|pluralize:"s" }}</span>
-    </div>
-
-    {% if employees %}
-    <table class="w-full">
-      <thead>
-        <tr class="border-b border-gray-100">
-          <th class="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase">Employee</th>
-          <th class="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase">Status</th>
-          <th class="px-6 py-3 text-xs font-semibold text-gray-400 uppercase text-right">Actions</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-50">
-        {% for emp in employees %}
-        <tr class="hover:bg-gray-50 transition-colors">
-          <td class="px-6 py-4">
-            <p class="font-medium text-gray-800 text-sm">{{ emp.get_full_name|default:emp.username }}</p>
-            <p class="text-xs text-gray-400">{{ emp.username }}</p>
-            {% if emp.userprofile.temp_password %}
-            <p class="text-xs font-mono text-gray-500 mt-1">🔑 {{ emp.userprofile.temp_password }}</p>
+  <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-100">
+            <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Colaborador</th>
+            <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden sm:table-cell">Username</th>
+            <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden md:table-cell">Função</th>
+            <th class="text-center px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Estado</th>
+            {% if request.user.is_superuser or request.user.userprofile.role == "manager" %}
+            <th class="text-center px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Ações</th>
             {% endif %}
-          </td>
-          <td class="px-6 py-4">
-            {% if not emp.is_active %}
-              <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">Inactive</span>
-            {% else %}
-              <span class="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">Active</span>
-            {% endif %}
-          </td>
-          <td class="px-6 py-4">
-            <div class="flex items-center justify-end gap-2 flex-wrap">
-              <!-- Reset password -->
-              <form method="post" class="flex items-center gap-1">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="reset" />
-                <input type="hidden" name="username" value="{{ emp.username }}" />
-                <input type="text" name="new_password" id="pwd-{{ emp.username }}" required placeholder="New password" minlength="4"
-                  class="text-xs p-1.5 border rounded-lg w-32 font-mono focus:outline-none focus:ring-1 focus:ring-purple-300" />
-                <button type="button" onclick="genPwd('pwd-{{ emp.username }}')"
-                  class="text-xs px-2 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg transition-colors whitespace-nowrap">
-                  Generate
-                </button>
-                <button type="submit"
-                  class="text-xs px-2.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors whitespace-nowrap">
-                  Update
-                </button>
-              </form>
-              <!-- Delete -->
-              <form method="post" class="inline" onsubmit="return confirm('Delete {{ emp.username }}? This action cannot be undone.')">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="delete" />
-                <input type="hidden" name="username" value="{{ emp.username }}" />
-                <button type="submit"
-                  class="text-xs px-2.5 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors">
-                  Delete
-                </button>
-              </form>
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-    <div class="px-6 py-10 text-center text-gray-400 text-sm">
-      <p class="text-3xl mb-2">👥</p>
-      <p>No employees yet. Add the first one above.</p>
+          </tr>
+        </thead>
+        <tbody id="empTable" class="divide-y divide-gray-50">
+          {% for i in "abc" %}
+          <tr>
+            <td class="px-5 py-4">
+              <div class="flex items-center gap-3">
+                <div class="skel w-10 h-10 rounded-full flex-shrink-0"></div>
+                <div class="space-y-2">
+                  <div class="skel h-4 w-28"></div>
+                  <div class="skel h-3 w-20"></div>
+                </div>
+              </div>
+            </td>
+            <td class="px-5 py-4 hidden sm:table-cell"><div class="skel h-4 w-20"></div></td>
+            <td class="px-5 py-4 hidden md:table-cell"><div class="skel h-5 w-16 rounded-full"></div></td>
+            <td class="px-5 py-4"><div class="skel h-5 w-14 mx-auto rounded-full"></div></td>
+            <td class="px-5 py-4"><div class="skel h-7 w-8 mx-auto rounded-lg"></div></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-    {% endif %}
   </div>
 
 </div>
 
+<!-- Create Employee Modal -->
+{% if request.user.is_superuser or request.user.userprofile.role == "manager" %}
+<div id="createModal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+      <h3 class="font-semibold text-gray-800">Novo colaborador</h3>
+      <button onclick="closeModal('createModal')" class="text-gray-400 hover:text-gray-600 transition-colors">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div class="p-6 space-y-4">
+      <div>
+        <label class="text-xs text-gray-500 font-medium">Nome completo *</label>
+        <input id="newName" type="text" placeholder="Ex: Maria Silva"
+          class="w-full mt-1.5 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-200 focus:outline-none" />
+      </div>
+      <div>
+        <label class="text-xs text-gray-500 font-medium">Username *</label>
+        <input id="newUsername" type="text" placeholder="Ex: maria.silva"
+          class="w-full mt-1.5 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-200 focus:outline-none" />
+        <p class="text-xs text-gray-400 mt-1">Apenas letras minúsculas, números, pontos e hífens</p>
+      </div>
+      <div>
+        <label class="text-xs text-gray-500 font-medium">Função</label>
+        <select id="newRole"
+          class="w-full mt-1.5 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-200 focus:outline-none bg-white text-gray-700">
+          <option value="employee">Funcionário</option>
+          <option value="manager">Gerente</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs text-gray-500 font-medium">Password temporária</label>
+        <div class="flex gap-2 mt-1.5">
+          <input id="newPassword" type="text" placeholder="Gerada automaticamente"
+            class="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-purple-200 focus:outline-none" />
+          <button onclick="generatePassword()" title="Gerar password"
+            class="px-3 py-2 rounded-lg text-sm font-medium border border-gray-200 hover:bg-gray-50 transition-colors text-gray-600"
+            style="background: color-mix(in srgb, var(--primary) 10%, white); border-color: color-mix(in srgb, var(--primary) 30%, white); color: var(--primary);">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <p class="text-xs text-gray-400 mt-1">O colaborador será obrigado a alterar na próxima entrada</p>
+      </div>
+      <div class="flex gap-3 pt-1">
+        <button onclick="createEmployee()"
+          class="flex-1 text-white py-2.5 rounded-xl font-medium transition-colors text-sm"
+          style="background-color: var(--primary);">Criar colaborador</button>
+        <button onclick="closeModal('createModal')"
+          class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-xl font-medium transition-colors text-sm">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
 <script>
-  function genPwd(inputId) {
-    const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789';
-    let pwd = '';
-    for (let i = 0; i < 10; i++) {
-      pwd += chars[Math.floor(Math.random() * chars.length)];
-    }
-    document.getElementById(inputId).value = pwd;
-  }
+const IS_MANAGER = {{ request.user.is_superuser|yesno:"true,false" }} || "{{ request.user.userprofile.role }}" === "manager";
+const ROLE_LABELS = { employee:"Funcionário", manager:"Gerente", admin:"Admin" };
+const ROLE_COLORS = {
+  employee:"bg-blue-100 text-blue-700",
+  manager:"bg-purple-100 text-purple-700",
+  admin:"bg-red-100 text-red-700",
+};
+
+function closeModal(id) { document.querySelector("#"+id).classList.add("hidden"); }
+function openCreateModal() {
+  document.querySelector("#createModal").classList.remove("hidden");
+  generatePassword();
+}
+
+function generatePassword() {
+  const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$";
+  let pw = "";
+  for (let i = 0; i < 10; i++) pw += chars[Math.floor(Math.random() * chars.length)];
+  document.querySelector("#newPassword").value = pw;
+}
+
+function getInitials(name) {
+  return name.split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase();
+}
+
+const BG_COLORS = [
+  "bg-violet-500","bg-blue-500","bg-green-500","bg-amber-500","bg-rose-500",
+  "bg-cyan-500","bg-teal-500","bg-indigo-500","bg-pink-500","bg-orange-500"
+];
+function avatarBg(username) {
+  let hash = 0;
+  for (const ch of username) hash = (hash * 31 + ch.charCodeAt(0)) & 0xffffffff;
+  return BG_COLORS[Math.abs(hash) % BG_COLORS.length];
+}
+
+async function loadEmployees() {
+  const res  = await fetch(`/${SLUG}/api/employees`);
+  const data = await res.json();
+  renderTable(data.results);
+}
+
+function renderTable(employees) {
+  const tbody = document.querySelector("#empTable");
+  tbody.innerHTML = "";
+  employees.forEach(emp => {
+    const roleCls   = ROLE_COLORS[emp.role] || "bg-gray-100 text-gray-500";
+    const roleLabel = ROLE_LABELS[emp.role] || emp.role;
+    const initials  = getInitials(emp.full_name || emp.username);
+    const bgCls     = avatarBg(emp.username);
+    const isActive  = emp.is_active;
+    const tr = document.createElement("tr");
+    tr.className = `hover:bg-gray-50 transition-colors ${!isActive ? "opacity-60" : ""}`;
+    tr.innerHTML = `
+      <td class="px-5 py-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full ${bgCls} flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+            ${initials}
+          </div>
+          <div>
+            <p class="font-medium text-gray-800 text-sm">${escHtml(emp.full_name || "–")}</p>
+            <p class="text-xs text-gray-400">${escHtml(emp.email || "")}</p>
+          </div>
+        </div>
+      </td>
+      <td class="px-5 py-4 text-gray-500 text-sm hidden sm:table-cell font-mono">${escHtml(emp.username)}</td>
+      <td class="px-5 py-4 hidden md:table-cell">
+        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${roleCls}">${roleLabel}</span>
+      </td>
+      <td class="px-5 py-4 text-center">
+        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-400"}">
+          ${isActive ? "Activo" : "Inactivo"}
+        </span>
+      </td>
+      ${IS_MANAGER ? `
+      <td class="px-5 py-4 text-center">
+        <button onclick='openEditModal(${JSON.stringify(emp)})' title="Editar"
+          class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-colors">
+          <i data-lucide="pencil" class="w-4 h-4"></i>
+        </button>
+      </td>
+      ` : ""}
+    `;
+    tbody.appendChild(tr);
+  });
+  lucide.createIcons();
+}
+
+async function createEmployee() {
+  const payload = {
+    full_name: document.querySelector("#newName").value.trim(),
+    username: document.querySelector("#newUsername").value.trim(),
+    role: document.querySelector("#newRole").value,
+    password: document.querySelector("#newPassword").value.trim(),
+  };
+  if (!payload.full_name || !payload.username) { showToast("Nome e username são obrigatórios.", "red"); return; }
+  const res = await fetch(`/${SLUG}/api/employees/create`, { method:"POST", headers:csrfHeaders(), body:JSON.stringify(payload) });
+  const data = await res.json();
+  if (!res.ok || data.error) { showToast("Erro: " + (data.error||"Erro desconhecido"), "red"); return; }
+  closeModal("createModal");
+  showToast("Colaborador criado com sucesso!", "green");
+  loadEmployees();
+}
+
+function openEditModal(emp) {
+  const msg = emp.is_active
+    ? `Desactivar o acesso de "${emp.full_name || emp.username}"?`
+    : `Reactivar o acesso de "${emp.full_name || emp.username}"?`;
+  if (!confirm(msg)) return;
+  fetch(`/${SLUG}/api/employees/${emp.id}/toggle`, { method:"PATCH", headers:csrfHeaders() })
+    .then(() => loadEmployees());
+}
+
+document.addEventListener("DOMContentLoaded", loadEmployees);
 </script>
 {% endblock %}

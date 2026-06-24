@@ -6,158 +6,182 @@
 
 {% block header_actions %}
 <a href="/{{ request.tenant.subdomain }}/availability/"
-  class="text-sm px-3 py-1.5 border rounded-lg hover:bg-gray-50 transition-colors">View available products</a>
+  class="text-sm px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-gray-600">
+  Ver inventário
+</a>
 <a href="/{{ request.tenant.subdomain }}/sale/"
-  class="text-sm px-4 py-1.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">New Sale</a>
+  class="text-sm px-4 py-1.5 rounded-lg font-medium text-white transition-colors"
+  style="background-color: var(--primary);">
+  + Registar venda
+</a>
 {% endblock %}
 
 {% block content %}
 <div class="space-y-6" id="dashboardRoot">
 
-  <!-- Month selector -->
+  <!-- Period selector -->
   <div class="flex items-center justify-between">
     <div>
-      <p class="text-xs text-gray-400 uppercase tracking-wide">Summary for</p>
-      <h2 class="text-xl font-bold text-gray-800" id="monthLabel">
-        <span class="skeleton inline-block w-32 h-6"></span>
-      </h2>
+      <p class="text-[11px] text-gray-400 uppercase tracking-wider font-semibold">Resumo de</p>
+      <h2 class="text-xl font-semibold text-gray-900" id="monthLabel">—</h2>
     </div>
     <div class="flex items-center gap-2">
       <select id="selMonth"
-        class="p-2 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-300">
-        <option value="1">January</option><option value="2">February</option>
-        <option value="3">March</option><option value="4">April</option>
-        <option value="5">May</option><option value="6">June</option>
-        <option value="7">July</option><option value="8">August</option>
-        <option value="9">September</option><option value="10">October</option>
-        <option value="11">November</option><option value="12">December</option>
+        class="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-200">
+        <option value="1">Janeiro</option>
+        <option value="2">Fevereiro</option>
+        <option value="3">Março</option>
+        <option value="4">Abril</option>
+        <option value="5">Maio</option>
+        <option value="6">Junho</option>
+        <option value="7">Julho</option>
+        <option value="8">Agosto</option>
+        <option value="9">Setembro</option>
+        <option value="10">Outubro</option>
+        <option value="11">Novembro</option>
+        <option value="12">Dezembro</option>
       </select>
       <select id="selYear"
-        class="p-2 border rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-300">
-        <option>2025</option><option>2026</option>
+        class="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-200">
+        <option>2025</option>
+        <option>2026</option>
       </select>
     </div>
   </div>
 
-  <!-- KPI banner -->
-  <div class="bg-white rounded-2xl border shadow-sm p-5">
-    <div class="flex items-start justify-between mb-4">
-      <div>
-        <p class="text-sm text-gray-400 font-medium">Sales Overview</p>
-        <p class="text-xs text-gray-400">General summary of sales generated on the platform</p>
-      </div>
-    </div>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 border-t pt-4" id="kpiGrid">
-      <div>
-        <p class="text-2xl font-bold text-gray-800" id="kpiRevenue"><span class="skeleton inline-block w-28 h-7"></span></p>
-        <p class="text-xs text-gray-400 mt-0.5">Revenue</p>
-        <span id="kpiChange" class="text-xs font-medium mt-1 inline-block px-2 py-0.5 rounded-full"></span>
-      </div>
-      <div>
-        <p class="text-2xl font-bold text-gray-800" id="kpiSales"><span class="skeleton inline-block w-16 h-7"></span></p>
-        <p class="text-xs text-gray-400 mt-0.5">Units sold</p>
-      </div>
-      <div>
-        <p class="text-2xl font-bold text-gray-800" id="kpiPayment"><span class="skeleton inline-block w-24 h-7"></span></p>
-        <p class="text-xs text-gray-400 mt-0.5">Top payment method</p>
-      </div>
-      <div>
-        <p class="text-2xl font-bold text-gray-800" id="kpiInventory"><span class="skeleton inline-block w-16 h-7"></span></p>
-        <p class="text-xs text-gray-400 mt-0.5">Units in inventory</p>
-      </div>
-    </div>
-    <div class="mt-6 h-36 relative">
-      <canvas id="salesChart"></canvas>
-    </div>
-  </div>
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
 
-  <!-- Row 2 -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
-    <div class="bg-white rounded-2xl border shadow-sm p-5 space-y-3">
-      <div class="flex items-center gap-2">
-        <i data-lucide="medal" style="width:15px;height:15px;color:#6b7280;stroke-width:1.75;"></i>
-        <p class="text-sm font-semibold text-gray-600">Top Employee</p>
-      </div>
-      <div id="topAttendant" class="flex flex-col justify-center h-24">
-        <span class="skeleton block w-32 h-7 mb-2"></span>
-        <span class="skeleton block w-24 h-4"></span>
-      </div>
-    </div>
-
-    <div class="bg-white rounded-2xl border shadow-sm p-5">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-2">
-          <i data-lucide="alert-triangle" style="width:15px;height:15px;color:#6b7280;stroke-width:1.75;"></i>
-          <p class="text-sm font-semibold text-gray-600">Low Stock Alerts</p>
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition-shadow">
+      <div class="flex justify-between items-start mb-4">
+        <div class="p-2 rounded-lg" style="background-color: var(--primary-light);">
+          <i data-lucide="banknote" class="w-5 h-5" style="color: var(--primary);"></i>
         </div>
-        <span class="bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full" id="lowStockCount">0</span>
+        <span id="kpiChange" class="text-[11px] font-semibold px-2 py-0.5 rounded-full"></span>
       </div>
-      <div id="lowStockList" class="space-y-2 text-sm">
-        <span class="skeleton block w-full h-4 mb-1"></span>
-        <span class="skeleton block w-3/4 h-4"></span>
-      </div>
-      <p class="text-xs text-gray-400 mt-3">Restock to avoid stockouts</p>
-      <div class="mt-2">
-        <div class="bg-gray-100 rounded-full h-1.5 w-full">
-          <div id="stockBar" class="bg-purple-500 h-1.5 rounded-full" style="width:0%"></div>
-        </div>
-        <p class="text-xs text-gray-400 mt-1" id="stockBarLabel"></p>
-      </div>
+      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Receita</p>
+      <p class="text-2xl font-semibold text-gray-900 skel h-8 w-32" id="kpiRevenue"></p>
     </div>
 
-    <div class="bg-white rounded-2xl border shadow-sm p-5">
-      <div class="flex items-center gap-2 mb-3">
-        <i data-lucide="star" style="width:15px;height:15px;color:#6b7280;stroke-width:1.75;"></i>
-        <p class="text-sm font-semibold text-gray-600">Highlights</p>
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition-shadow">
+      <div class="flex justify-between items-start mb-4">
+        <div class="p-2 bg-blue-50 rounded-lg">
+          <i data-lucide="shopping-basket" class="w-5 h-5 text-blue-500"></i>
+        </div>
       </div>
-      <div id="topProductsList" class="space-y-2 text-sm">
-        <span class="skeleton block w-full h-4 mb-1"></span>
-        <span class="skeleton block w-5/6 h-4 mb-1"></span>
-        <span class="skeleton block w-4/5 h-4"></span>
+      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Unidades vendidas</p>
+      <p class="text-2xl font-semibold text-gray-900 skel h-8 w-16" id="kpiSales"></p>
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition-shadow">
+      <div class="flex justify-between items-start mb-4">
+        <div class="p-2 bg-amber-50 rounded-lg">
+          <i data-lucide="credit-card" class="w-5 h-5 text-amber-500"></i>
+        </div>
       </div>
-      <a href="/{{ request.tenant.subdomain }}/history/"
-        class="text-purple-600 text-xs font-medium mt-4 inline-block hover:underline">View sales →</a>
+      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Meio de pagamento</p>
+      <p class="text-2xl font-semibold text-gray-900 skel h-8 w-24" id="kpiPayment"></p>
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition-shadow">
+      <div class="flex justify-between items-start mb-4">
+        <div class="p-2 bg-green-50 rounded-lg">
+          <i data-lucide="package" class="w-5 h-5 text-green-500"></i>
+        </div>
+      </div>
+      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Unidades no inventário</p>
+      <p class="text-2xl font-semibold text-gray-900 skel h-8 w-16" id="kpiInventory"></p>
     </div>
 
   </div>
 
-  <!-- Bottom row -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-    <div class="bg-white rounded-2xl border shadow-sm p-5">
-      <div class="flex items-center gap-2 mb-4">
-        <i data-lucide="credit-card" style="width:15px;height:15px;color:#6b7280;stroke-width:1.75;"></i>
-        <p class="text-sm font-semibold text-gray-600">Payment Methods</p>
+  <!-- Bento grid -->
+  <div class="grid grid-cols-12 gap-4">
+
+    <!-- Sales trend line chart (8 cols) -->
+    <div class="col-span-12 lg:col-span-8 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+      <div class="mb-5">
+        <h3 class="text-base font-semibold text-gray-900">Tendência de receita</h3>
+        <p class="text-xs text-gray-400 mt-0.5">Desempenho diário no mês selecionado</p>
       </div>
-      <div class="flex flex-col items-center gap-4">
-        <div class="w-28 h-28 relative flex-shrink-0">
+      <div class="h-64 relative">
+        <canvas id="salesChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Payment methods donut (4 cols) -->
+    <div class="col-span-12 lg:col-span-4 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+      <h3 class="text-base font-semibold text-gray-900 mb-5">Meios de pagamento</h3>
+      <div class="flex justify-center">
+        <div class="w-36 h-36 relative">
           <canvas id="paymentChart"></canvas>
         </div>
-        <div id="paymentLegend" class="space-y-1.5 text-sm w-full"></div>
       </div>
+      <div id="paymentLegend" class="mt-4 space-y-2 text-sm"></div>
     </div>
 
-    <div class="bg-white rounded-2xl border shadow-sm p-5">
-      <div class="flex items-center gap-2 mb-4">
-        <i data-lucide="calendar-days" style="width:15px;height:15px;color:#6b7280;stroke-width:1.75;"></i>
-        <p class="text-sm font-semibold text-gray-600">Sales by Day of Week</p>
-      </div>
-      <div class="h-36 relative">
+    <!-- Weekday bar chart (6 cols) -->
+    <div class="col-span-12 lg:col-span-6 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+      <h3 class="text-base font-semibold text-gray-900 mb-5 flex items-center gap-2">
+        <i data-lucide="calendar-days" class="w-4 h-4 text-gray-400"></i>
+        Vendas por dia da semana
+      </h3>
+      <div class="h-44 relative">
         <canvas id="weekdayChart"></canvas>
       </div>
     </div>
 
-    <div class="bg-white rounded-2xl border shadow-sm p-5">
-      <div class="flex items-center gap-2 mb-4">
-        <i data-lucide="trending-up" style="width:15px;height:15px;color:#6b7280;stroke-width:1.75;"></i>
-        <p class="text-sm font-semibold text-gray-600">Top Products This Month</p>
+    <!-- Low stock alerts (6 cols) -->
+    <div class="col-span-12 lg:col-span-6 bg-white rounded-xl border border-gray-100 shadow-sm p-6 flex flex-col">
+      <div class="flex justify-between items-center mb-5">
+        <h3 class="text-base font-semibold text-gray-900">Alertas de stock</h3>
+        <span class="bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full" id="lowStockCount">0</span>
       </div>
-      <div id="topProductsTable" class="space-y-2">
-        <span class="skeleton block w-full h-5 mb-2"></span>
-        <span class="skeleton block w-5/6 h-5 mb-2"></span>
-        <span class="skeleton block w-4/5 h-5"></span>
+      <div id="lowStockList" class="space-y-2 text-sm flex-1"></div>
+      <div class="mt-4">
+        <div class="flex justify-between text-xs text-gray-400 mb-1.5">
+          <span>Saúde do stock</span>
+          <span id="stockBarLabel"></span>
+        </div>
+        <div class="bg-gray-100 rounded-full h-1.5">
+          <div id="stockBar" class="h-1.5 rounded-full transition-all duration-500" style="width:0%; background-color: var(--primary);"></div>
+        </div>
       </div>
     </div>
+
+    <!-- Top attendant (4 cols) -->
+    <div class="col-span-12 lg:col-span-4 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+      <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <i data-lucide="award" class="w-4 h-4 text-gray-400"></i>
+        Funcionário em destaque
+      </h3>
+      <div id="topAttendant" class="flex flex-col justify-center h-20">
+        <p class="text-gray-400 text-sm">—</p>
+      </div>
+    </div>
+
+    <!-- Top products (destaques) (4 cols) -->
+    <div class="col-span-12 lg:col-span-4 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+      <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <i data-lucide="star" class="w-4 h-4 text-gray-400"></i>
+        Destaques
+      </h3>
+      <div id="topProductsList" class="space-y-2 text-sm"></div>
+      <a href="/{{ request.tenant.subdomain }}/history/"
+        class="text-xs font-medium mt-4 inline-block hover:underline" style="color: var(--primary);">
+        Ver vendas →
+      </a>
+    </div>
+
+    <!-- Top products table (4 cols) -->
+    <div class="col-span-12 lg:col-span-4 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+      <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <i data-lucide="trophy" class="w-4 h-4 text-gray-400"></i>
+        Top produtos do mês
+      </h3>
+      <div id="topProductsTable" class="space-y-2"></div>
+    </div>
+
   </div>
 
 </div>
@@ -165,143 +189,222 @@
 
 {% block scripts %}
 <script>
-  const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const PAYMENT_COLORS = { "Cash":"#22c55e","M-Pesa":"#3b82f6","E-Mola":"#f59e0b","eMola":"#f59e0b","Card":"#8b5cf6","Transfer":"#64748b","POS":"#0ea5e9" };
+  const MONTHS = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+  const PAYMENT_COLORS = { "Dinheiro": "#22c55e", "M-Pesa": "#3b82f6", "E-Mola": "#f59e0b", "eMola": "#f59e0b", "Cartao": "#8b5cf6", "Transferencia": "#64748b", "POS": "#0ea5e9" };
 
   let salesChartInst, paymentChartInst, weekdayChartInst;
-  function fmt(n) { return Number(n).toLocaleString("pt-MZ",{minimumFractionDigits:2,maximumFractionDigits:2})+" MZN"; }
+
+  function fmt(n) { return Number(n).toLocaleString("pt-MZ", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " MZN"; }
 
   async function loadDashboard() {
     const month = document.querySelector("#selMonth").value;
-    const year  = document.querySelector("#selYear").value;
+    const year = document.querySelector("#selYear").value;
+
     const res = await fetch(`/${SLUG}/api/dashboard?month=${month}&year=${year}`);
     const d = await res.json();
 
-    document.querySelector("#monthLabel").textContent = `${MONTHS[d.month-1]} ${d.year}`;
+    document.querySelector("#monthLabel").textContent = `${MONTHS[d.month - 1]} de ${d.year}`;
 
-    document.querySelector("#kpiRevenue").textContent  = fmt(d.total_revenue);
-    document.querySelector("#kpiSales").textContent    = d.total_units_sold;
-    document.querySelector("#kpiInventory").textContent = d.total_inventory;
+    function unskel(id, text) {
+      const el = document.getElementById(id);
+      el.classList.remove('skel', 'h-8', 'w-32', 'w-24', 'w-16');
+      el.textContent = text;
+    }
+    unskel('kpiRevenue', fmt(d.total_revenue));
+    unskel('kpiSales', d.total_units_sold);
+    unskel('kpiInventory', d.total_inventory);
 
-    const topP = Object.entries(d.payment_breakdown).sort((a,b)=>b[1].total-a[1].total)[0];
+    const topP = Object.entries(d.payment_breakdown).sort((a, b) => b[1].total - a[1].total)[0];
     if (topP) {
-      const pct = d.total_revenue > 0 ? Math.round(topP[1].total/d.total_revenue*100) : 0;
-      document.querySelector("#kpiPayment").textContent = `${pct}% ${topP[0]}`;
+      const pct = d.total_revenue > 0 ? Math.round(topP[1].total / d.total_revenue * 100) : 0;
+      unskel('kpiPayment', `${pct}% ${topP[0]}`);
+    } else {
+      unskel('kpiPayment', '—');
     }
 
     const chg = d.revenue_change_pct;
     document.querySelectorAll("#kpiChange").forEach(el => {
-      el.textContent = `${chg>=0?"+":""}${chg}%`;
-      el.className = `text-xs font-medium mt-1 inline-block px-2 py-0.5 rounded-full ${chg>=0?"bg-green-100 text-green-700":"bg-red-100 text-red-600"}`;
+      el.textContent = `${chg >= 0 ? "+" : ""}${chg}%`;
+      el.className = `text-[11px] font-semibold px-2 py-0.5 rounded-full ${chg >= 0 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"}`;
     });
 
-    // Top employee — neutral revenue text
     const ta = d.top_attendant;
     document.querySelector("#topAttendant").innerHTML = ta
       ? `<p class="text-2xl font-bold text-gray-800">${escHtml(ta.name)}</p>
-         <p class="text-sm font-semibold text-gray-700 mt-1">${fmt(ta.revenue)}</p>
-         <p class="text-xs text-gray-400 mt-0.5">${ta.count} sale${ta.count!==1?"s":""}</p>`
-      : `<p class="text-gray-400 text-sm">No sales recorded for this period</p>`;
+         <p class="text-sm text-gray-700 font-semibold mt-1">${fmt(ta.revenue)}</p>
+         <p class="text-xs text-gray-400 mt-0.5">${ta.count} venda${ta.count !== 1 ? 's' : ''}</p>`
+      : `<p class="text-gray-400 text-sm">Sem vendas registadas neste período</p>`;
 
-    // Sales chart
-    if (salesChartInst) salesChartInst.destroy();
-    salesChartInst = new Chart(document.querySelector("#salesChart"), {
+    const labels = d.chart_data.map(x => x.day);
+    const values = d.chart_data.map(x => x.revenue);
+    const primary = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#7c3aed';
+
+    const chartCfg = {
       type: "line",
       data: {
-        labels: d.chart_data.map(x=>x.day),
-        datasets: [{ data: d.chart_data.map(x=>x.revenue), borderColor:"#7c3aed",
-          backgroundColor:"rgba(124,58,237,0.08)", fill:true, tension:0.4, pointRadius:0, borderWidth:2 }]
+        labels,
+        datasets: [{
+          data: values,
+          borderColor: primary,
+          backgroundColor: (ctx) => {
+            const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 200);
+            gradient.addColorStop(0, primary + '22');
+            gradient.addColorStop(1, primary + '00');
+            return gradient;
+          },
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 5,
+          borderWidth: 2,
+        }]
       },
-      options: { responsive:true, maintainAspectRatio:false,
-        plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed.y)}} },
-        scales:{ x:{display:false}, y:{display:false} } }
-    });
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1f2937',
+            titleColor: '#9ca3af',
+            bodyColor: '#ffffff',
+            padding: 10,
+            cornerRadius: 8,
+            displayColors: false,
+            callbacks: {
+              title: ctx => `Dia ${ctx[0].label}`,
+              label: ctx => fmt(ctx.parsed.y),
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: {
+              font: { size: 11, family: 'Inter' },
+              color: '#9ca3af',
+              maxTicksLimit: 8,
+              maxRotation: 0,
+            }
+          },
+          y: {
+            grid: { color: '#f3f4f6' },
+            border: { dash: [4, 4] },
+            ticks: {
+              font: { size: 11, family: 'Inter' },
+              color: '#9ca3af',
+              callback: value => fmt(value),
+              maxTicksLimit: 5,
+            }
+          }
+        }
+      }
+    };
 
-    // Weekday chart
+    if (salesChartInst) salesChartInst.destroy();
+    salesChartInst = new Chart(document.querySelector("#salesChart"), chartCfg);
+
     if (weekdayChartInst) weekdayChartInst.destroy();
     weekdayChartInst = new Chart(document.querySelector("#weekdayChart"), {
-      type:"bar",
-      data:{ labels:d.sales_by_weekday.map(x=>x.day),
-        datasets:[{ data:d.sales_by_weekday.map(x=>x.revenue), backgroundColor:"#7c3aed", borderRadius:5 }] },
-      options:{ responsive:true, maintainAspectRatio:false,
-        plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed.y)}} },
-        scales:{ x:{grid:{display:false}, ticks:{font:{size:11}}}, y:{display:false} } }
+      type: "bar",
+      data: {
+        labels: d.sales_by_weekday.map(x => x.day),
+        datasets: [{
+          data: d.sales_by_weekday.map(x => x.revenue),
+          backgroundColor: primary + '22',
+          hoverBackgroundColor: primary,
+          borderRadius: 5,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => fmt(ctx.parsed.y) } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#9ca3af' } },
+          y: { display: false }
+        }
+      }
     });
 
-    // Low stock — neutral stock values with coloured dots
     const lowList = document.querySelector("#lowStockList");
     document.querySelector("#lowStockCount").textContent = d.low_stock.length;
-    lowList.innerHTML = d.low_stock.length===0
-      ? "<p class='text-gray-400 text-xs'>No low stock products ✓</p>"
-      : d.low_stock.slice(0,5).map(s => {
-          const dot = s.current_stock===0
-            ? '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#dc2626;margin-right:5px;flex-shrink:0;"></span>'
-            : '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#d97706;margin-right:5px;flex-shrink:0;"></span>';
-          return `<div class="flex justify-between items-center">
-            <span class="text-gray-700 truncate max-w-[150px]">${escHtml(s["product__name"])} ${escHtml(s.size||"")} ${escHtml(s.color||"")}</span>
-            <span class="flex items-center text-xs text-gray-700 ml-2 flex-shrink-0">${dot}${s.current_stock===0?"Out":s.current_stock+" u."}</span>
-          </div>`;
-        }).join("");
+    lowList.innerHTML = d.low_stock.length === 0
+      ? "<p class='text-gray-400 text-xs'>Nenhum produto em stock baixo ✓</p>"
+      : d.low_stock.slice(0, 5).map(s => `
+        <div class="flex justify-between items-center py-1.5">
+          <span class="text-gray-700 truncate max-w-[60%]">${escHtml(s["product__name"])} ${escHtml(s.size || "")} ${escHtml(s.color || "")}</span>
+          <span class="inline-flex items-center gap-1.5 flex-shrink-0">
+            <span class="w-1.5 h-1.5 rounded-full ${s.current_stock === 0 ? "bg-red-400" : "bg-amber-400"}"></span>
+            <span class="text-xs text-gray-500">${s.current_stock === 0 ? "Esgotado" : s.current_stock + " un."}</span>
+          </span>
+        </div>`).join("");
 
-    const pct = d.total_inventory>0 ? Math.min(100,Math.round((d.total_inventory-d.low_stock.length)/d.total_inventory*100)) : 0;
-    document.querySelector("#stockBar").style.width = pct+"%";
-    document.querySelector("#stockBarLabel").textContent = `${pct}% stock in use`;
+    const totalInv = d.total_inventory;
+    const lowCount = d.low_stock.length;
+    const pct = totalInv > 0 ? Math.min(100, Math.round((totalInv - lowCount) / totalInv * 100)) : 0;
+    document.querySelector("#stockBar").style.width = pct + "%";
+    document.querySelector("#stockBarLabel").textContent = `${pct}% saudável`;
 
-    // Top products highlights — hash rank instead of medals
-    document.querySelector("#topProductsList").innerHTML = d.top_products.slice(0,4).map((p,i)=>
-      `<div class="flex justify-between items-center text-sm">
-        <span class="text-gray-600"><span class="text-gray-400 font-mono text-xs mr-1">#${i+1}</span>${escHtml(p.name)}</span>
-        <span class="font-semibold text-gray-800">${p.units} units</span>
+    document.querySelector("#topProductsList").innerHTML = d.top_products.slice(0, 5).map((p, i) =>
+      `<div class="flex justify-between items-center text-sm gap-2">
+        <span class="flex items-center gap-2 min-w-0">
+          <span class="inline-flex items-center gap-0.5 text-gray-400 flex-shrink-0 w-6">
+            <i data-lucide="hash" class="w-3 h-3"></i><span class="text-xs font-semibold">${i + 1}</span>
+          </span>
+          <span class="text-gray-700 truncate">${escHtml(p.name)}</span>
+        </span>
+        <span class="font-semibold text-gray-800 flex-shrink-0">${p.units} un.</span>
       </div>`
-    ).join("") || "<p class='text-gray-400 text-xs'>No sales this period</p>";
+    ).join("") || "<p class='text-gray-400 text-xs'>Sem vendas neste período</p>";
+    lucide.createIcons();
 
-    // Top products table — hash rank
-    document.querySelector("#topProductsTable").innerHTML = d.top_products.map((p,i)=>
-      `<div class="flex justify-between items-center py-1.5 border-b last:border-0">
-        <span class="text-gray-700 text-sm"><span class="text-gray-400 font-mono text-xs mr-1">#${i+1}</span>${escHtml(p.name)}</span>
+    document.querySelector("#topProductsTable").innerHTML = d.top_products.map(p =>
+      `<div class="flex justify-between items-center py-1.5 border-b border-gray-50 last:border-0">
+        <span class="text-gray-700 text-sm truncate max-w-[55%]">${escHtml(p.name)}</span>
         <div class="text-right">
           <p class="text-sm font-semibold text-gray-800">${fmt(p.revenue)}</p>
-          <p class="text-xs text-gray-400">${p.units} units</p>
+          <p class="text-xs text-gray-400">${p.units} unidades</p>
         </div>
       </div>`
-    ).join("") || "<p class='text-gray-400 text-sm'>No data this period</p>";
+    ).join("") || "<p class='text-gray-400 text-sm'>Sem dados neste período</p>";
 
-    // Payment donut
     const payLabels = Object.keys(d.payment_breakdown);
-    const payValues = payLabels.map(k=>d.payment_breakdown[k].total);
-    const payColors = payLabels.map(k=>PAYMENT_COLORS[k]||"#94a3b8");
+    const payValues = payLabels.map(k => d.payment_breakdown[k].total);
+    const payColors = payLabels.map(k => PAYMENT_COLORS[k] || "#94a3b8");
+
     if (paymentChartInst) paymentChartInst.destroy();
-    if (payLabels.length>0) {
+    if (payLabels.length > 0) {
       paymentChartInst = new Chart(document.querySelector("#paymentChart"), {
-        type:"doughnut",
-        data:{ labels:payLabels, datasets:[{ data:payValues, backgroundColor:payColors, borderWidth:0 }] },
-        options:{ responsive:true, maintainAspectRatio:false, cutout:"70%",
-          plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed)}} } }
+        type: "doughnut",
+        data: { labels: payLabels, datasets: [{ data: payValues, backgroundColor: payColors, borderWidth: 0 }] },
+        options: {
+          responsive: true, maintainAspectRatio: false, cutout: "70%",
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => fmt(ctx.parsed) } } }
+        }
       });
-      const total = payValues.reduce((a,b)=>a+b,0);
-      document.querySelector("#paymentLegend").innerHTML = payLabels.map((l,i)=>{
-        const p = total>0 ? Math.round(payValues[i]/total*100) : 0;
+
+      const total = payValues.reduce((a, b) => a + b, 0);
+      document.querySelector("#paymentLegend").innerHTML = payLabels.map((l, i) => {
+        const pct = total > 0 ? Math.round(payValues[i] / total * 100) : 0;
         return `<div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:${payColors[i]}"></span>
-          <span class="text-gray-600">${l}</span>
-          <span class="ml-auto font-semibold text-gray-800">${p}%</span>
+          <span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${payColors[i]}"></span>
+          <span class="text-gray-600 text-xs">${l}</span>
+          <span class="ml-auto font-semibold text-xs text-gray-800">${pct}%</span>
         </div>`;
       }).join("");
     } else {
-      document.querySelector("#paymentLegend").innerHTML = "<p class='text-gray-400 text-xs'>No sales this period</p>";
+      document.querySelector("#paymentLegend").innerHTML = "<p class='text-gray-400 text-xs'>Sem vendas neste período</p>";
     }
-
-    // Re-run Lucide for any icons injected into the DOM
-    if (window.lucide) lucide.createIcons();
   }
 
   document.addEventListener("DOMContentLoaded", () => {
     const today = new Date();
-    document.querySelector("#selMonth").value = today.getMonth()+1;
-    document.querySelector("#selYear").value  = today.getFullYear();
-    loadDashboard();
-    document.querySelector("#selMonth").addEventListener("change", loadDashboard);
-    document.querySelector("#selYear").addEventListener("change", loadDashboard);
+    document.querySelector("#selMonth").value = today.getMonth() + 1;
+    document.querySelector("#selYear").value = today.getFullYear();
+    loadDashboard().then(() => lucide.createIcons());
+    document.querySelector("#selMonth").addEventListener("change", () => loadDashboard().then(() => lucide.createIcons()));
+    document.querySelector("#selYear").addEventListener("change", () => loadDashboard().then(() => lucide.createIcons()));
   });
 </script>
 {% endblock %}

@@ -1,142 +1,182 @@
 {% extends "pos/base.html" %}
 {% load static %}
-{% block title %}New Sale{% endblock %}
+{% block title %}Vendas{% endblock %}
 {% block nav_sale %}active{% endblock %}
-{% block page_title %}New Sale{% endblock %}
+{% block page_title %}Registar Venda{% endblock %}
 
 {% block content %}
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<div class="flex gap-5 items-start">
 
-  <!-- Left: Product search -->
-  <div class="space-y-4">
-    <div class="bg-white rounded-xl border shadow-sm p-4">
-      <p class="font-semibold text-gray-700 mb-3">Product</p>
-      <div class="relative">
-        <input id="saleSearch" type="text" placeholder="Search by name or SKU…"
-          class="w-full p-3 pr-10 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
-        <span class="absolute right-3 top-3 text-gray-400" style="display:flex;"><i data-lucide="search" style="width:16px;height:16px;stroke-width:2;color:#9ca3af;"></i></span>
-      </div>
-      <div id="searchResults" class="mt-3 space-y-2 max-h-72 overflow-y-auto"></div>
+  <!-- Left: search + sale details -->
+  <section class="flex-1 flex flex-col gap-4 min-w-0">
+
+    <!-- Search bar -->
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm px-4 py-3 flex items-center gap-3 flex-shrink-0">
+      <i data-lucide="search" class="w-5 h-5 text-gray-400 flex-shrink-0"></i>
+      <input id="saleSearch" type="text" autocomplete="off"
+        placeholder="Pesquisar produto por nome ou SKU…"
+        class="flex-1 text-sm text-gray-800 placeholder-gray-400 focus:outline-none bg-transparent" />
     </div>
 
+    <!-- Search results -->
+    <div id="searchResults" class="space-y-2 overflow-y-auto flex-shrink-0 max-h-64 pr-1"></div>
+
     <!-- Sale details -->
-    <div class="bg-white rounded-xl border shadow-sm p-4 space-y-3">
-      <div class="flex items-center gap-2"><i data-lucide="receipt" style="width:15px;height:15px;color:#6b7280;stroke-width:1.75;"></i><p class="font-semibold text-gray-700">Sale Details</p></div>
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 space-y-4 flex-shrink-0">
+      <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Detalhes da venda</p>
 
       <div>
-        <p class="text-xs text-gray-500 font-medium mb-2">Payment method</p>
-        <div class="flex flex-wrap gap-2" id="paymentBtns">
-          <button data-pay="Cash" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-green-100 text-green-700 ring-2 ring-green-400">Cash</button>
-          <button data-pay="M-Pesa" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-blue-100 text-blue-700">M-Pesa</button>
-          <button data-pay="E-Mola" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-yellow-100 text-yellow-700">E-Mola</button>
-          <button data-pay="POS" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-blue-100 text-blue-700">POS</button>
-          <button data-pay="Card" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-purple-100 text-purple-700">Card</button>
-          <button data-pay="Transfer" class="pay-btn px-3 py-1.5 text-xs font-medium rounded-lg border-2 border-transparent bg-gray-100 text-gray-600">Transfer</button>
-        </div>
-        <input type="hidden" id="selectedPayment" value="Cash" />
-      </div>
-
-      <div>
-        <label class="text-xs text-gray-500 font-medium">Sale location</label>
-        <select id="saleLocation" class="w-full mt-1 p-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 bg-white">
-          <option value="Store">Store</option>
+        <label class="text-xs text-gray-500 font-medium">Local de venda</label>
+        <select id="saleLocation"
+          class="w-full mt-1.5 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-200 bg-white text-gray-700">
+          <option value="Loja">Loja</option>
           <option value="Online">Online</option>
         </select>
       </div>
 
       <div>
-        <label class="text-xs text-gray-500 font-medium">Customer details (optional)</label>
-        <input id="customerName" type="text" placeholder="Name, contact and other customer information"
-          class="w-full mt-1 p-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
-      </div>
-    </div>
-  </div>
-
-  <!-- Right: Cart -->
-  <div class="space-y-4">
-    <div class="bg-white rounded-xl border shadow-sm p-4">
-      <div class="flex items-center gap-2 mb-4">
-        <i data-lucide="shopping-cart" style="width:15px;height:15px;color:#6b7280;stroke-width:1.75;"></i>
-        <p class="font-semibold text-gray-700">Cart</p>
-      </div>
-      <div id="cartItems" class="space-y-3 min-h-24">
-        <div class="flex flex-col items-center justify-center h-24 text-gray-400">
-          <i data-lucide="shopping-cart" style="width:36px;height:36px;color:#d1d5db;margin-bottom:4px;"></i>
-          <p class="text-sm mt-1">Select a product to continue</p>
-        </div>
+        <label class="text-xs text-gray-500 font-medium">Dados do cliente (opcional)</label>
+        <input id="customerName" type="text" placeholder="Nome, contacto e outras informações"
+          class="w-full mt-1.5 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-200" />
       </div>
     </div>
 
-    <!-- Totals -->
-    <div class="bg-white rounded-xl border shadow-sm p-4 space-y-3">
-      <div class="flex justify-between text-sm text-gray-500">
-        <span>Subtotal</span><span id="cartSubtotal">0.00 MZN</span>
+  </section>
+
+  <!-- Right: cart panel -->
+  <aside class="w-[380px] flex flex-col bg-white rounded-xl border border-gray-100 shadow-sm flex-shrink-0">
+
+    <!-- Cart header -->
+    <div class="px-5 py-4 border-b border-gray-100 flex items-center gap-2 flex-shrink-0">
+      <i data-lucide="shopping-cart" class="w-4 h-4 text-gray-400"></i>
+      <h2 class="font-semibold text-gray-800 text-sm">Carrinho</h2>
+    </div>
+
+    <!-- Cart items (scrollable) -->
+    <div id="cartItems" class="flex-1 overflow-y-auto p-4 space-y-3">
+      <div class="flex flex-col items-center justify-center h-32 text-gray-400">
+        <i data-lucide="shopping-cart" class="w-8 h-8 text-gray-300"></i>
+        <p class="text-sm mt-2">Seleccione um produto para continuar</p>
       </div>
-      <div id="discountRow" class="hidden flex justify-between text-sm text-red-500">
-        <span>Item discounts</span><span>−<span id="cartDiscount">0.00</span> MZN</span>
-      </div>
-      <div class="flex items-center gap-2">
-        <label class="text-xs text-gray-500 whitespace-nowrap">General discount (MZN)</label>
-        <input id="flatDiscount" type="number" min="0" step="1" placeholder="0"
-          class="w-full p-2 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" value="0" />
-      </div>
-      <div id="flatDiscountRow" class="hidden flex justify-between text-sm text-red-500">
-        <span>General discount</span><span>−<span id="cartFlatDiscount">0.00</span> MZN</span>
-      </div>
-      <div class="flex justify-between font-bold text-base border-t pt-3">
-        <span>Total</span><span id="cartTotal">0.00 MZN</span>
-      </div>
-      <div id="cashSection">
-        <label class="text-xs text-gray-500">Amount received (MZN)</label>
-        <input id="amountPaid" type="number" min="0" step="1" placeholder="0"
-          class="w-full mt-1 p-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" value="0" />
-        <div class="flex justify-between text-sm text-green-600 font-medium mt-1.5">
-          <span>Change</span><span id="changeDisplay">0.00 MZN</span>
+    </div>
+
+    <!-- Footer: totals + payment + checkout -->
+    <div class="border-t border-gray-100 p-4 space-y-4 bg-gray-50/60 flex-shrink-0">
+
+      <!-- Totals -->
+      <div class="space-y-1.5">
+        <div class="flex justify-between text-sm text-gray-500">
+          <span>Subtotal</span><span id="cartSubtotal">0,00 MZN</span>
+        </div>
+        <div id="discountRow" class="hidden flex justify-between text-sm text-red-500">
+          <span>Desconto artigos</span><span>−<span id="cartDiscount">0,00</span> MZN</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-xs text-gray-500 whitespace-nowrap">Desc. geral (MZN)</label>
+          <input id="flatDiscount" type="number" min="0" step="1" placeholder="0" value="0"
+            class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-200" />
+        </div>
+        <div id="flatDiscountRow" class="hidden flex justify-between text-sm text-red-500">
+          <span>Desconto geral</span><span>−<span id="cartFlatDiscount">0,00</span> MZN</span>
+        </div>
+        <div class="flex justify-between font-semibold text-base border-t border-gray-100 pt-2 mt-1">
+          <span class="text-gray-800">Total</span>
+          <span id="cartTotal" class="text-gray-900">0,00 MZN</span>
         </div>
       </div>
-      <button id="btnCheckout" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl transition-colors">
-        Complete Sale
+
+      <!-- Cash section -->
+      <div id="cashSection" class="space-y-1.5">
+        <label class="text-xs text-gray-500 font-medium">Montante recebido (MZN)</label>
+        <input id="amountPaid" type="number" min="0" step="1" placeholder="0" value="0"
+          class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-200" />
+        <div class="flex justify-between text-sm text-green-600 font-medium">
+          <span>Troco</span><span id="changeDisplay">0,00 MZN</span>
+        </div>
+      </div>
+
+      <!-- Payment methods -->
+      <div>
+        <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Método de Pagamento</p>
+        <div class="grid grid-cols-3 gap-2" id="paymentBtns">
+          <button data-pay="Dinheiro"
+            class="pay-btn flex flex-col items-center justify-center gap-1 py-2.5 rounded-lg border border-green-100 bg-green-50 text-green-700 text-[11px] font-semibold transition-all hover:bg-green-100">
+            <i data-lucide="banknote" class="w-4 h-4"></i>Dinheiro
+          </button>
+          <button data-pay="eMola"
+            class="pay-btn flex flex-col items-center justify-center gap-1 py-2.5 rounded-lg border border-yellow-100 bg-yellow-50 text-yellow-700 text-[11px] font-semibold transition-all hover:bg-yellow-100">
+            <i data-lucide="smartphone" class="w-4 h-4"></i>eMola
+          </button>
+          <button data-pay="Transferencia"
+            class="pay-btn flex flex-col items-center justify-center gap-1 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-600 text-[11px] font-semibold transition-all hover:bg-gray-100">
+            <i data-lucide="landmark" class="w-4 h-4"></i>Transf.
+          </button>
+          <button data-pay="M-Pesa"
+            class="pay-btn flex flex-col items-center justify-center gap-1 py-2.5 rounded-lg border border-red-100 bg-red-50 text-red-600 text-[11px] font-semibold transition-all hover:bg-red-100">
+            <i data-lucide="phone" class="w-4 h-4"></i>M-Pesa
+          </button>
+          <button data-pay="POS"
+            class="pay-btn flex flex-col items-center justify-center gap-1 py-2.5 rounded-lg border border-purple-100 bg-purple-50 text-purple-600 text-[11px] font-semibold transition-all hover:bg-purple-100 col-span-2">
+            <i data-lucide="credit-card" class="w-4 h-4"></i>POS
+          </button>
+        </div>
+        <input type="hidden" id="selectedPayment" value="Dinheiro" />
+      </div>
+
+      <!-- Checkout button -->
+      <button id="btnCheckout"
+        class="w-full py-3 rounded-xl text-white font-semibold text-sm shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+        style="background-color: var(--primary);">
+        <i data-lucide="check-circle" class="w-4 h-4"></i>
+        Registar Venda
       </button>
+
     </div>
-  </div>
+  </aside>
+
 </div>
 
 <!-- Receipt modal -->
 <div id="receiptModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
   <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center space-y-4">
-    <div><i data-lucide="check-circle" style="width:52px;height:52px;color:#16a34a;margin:0 auto;"></i></div>
-    <h2 class="text-2xl font-bold">Sale Completed!</h2>
+    <i data-lucide="check-circle" class="w-14 h-14 mx-auto text-green-500"></i>
+    <h2 class="text-2xl font-bold text-gray-900">Venda Registada!</h2>
     <p id="receiptSub" class="text-gray-500 text-sm"></p>
     <div id="receiptBody" class="bg-gray-50 rounded-xl p-4 space-y-1 text-sm text-left"></div>
     <button onclick="document.querySelector('#receiptModal').classList.add('hidden')"
-      class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-xl">
-      New Sale
+      class="w-full text-white font-semibold py-3 rounded-xl transition-colors"
+      style="background-color: var(--primary);">
+      Nova Venda
     </button>
   </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
+<style>
+  .pay-btn-selected {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+</style>
 <script>
 function getCart() { return JSON.parse(localStorage.getItem("pos_cart") || "[]"); }
 function saveCart(c) { localStorage.setItem("pos_cart", JSON.stringify(c)); }
 function clearCart() { localStorage.removeItem("pos_cart"); }
 function mzn(n) { return Number(n).toLocaleString("pt-MZ", {minimumFractionDigits:2, maximumFractionDigits:2}) + " MZN"; }
 
-// Payment buttons
 document.querySelectorAll(".pay-btn").forEach(btn => {
   btn.addEventListener("click", () => {
-    document.querySelectorAll(".pay-btn").forEach(b => b.classList.remove("ring-2","ring-offset-1","ring-green-400","ring-blue-400","ring-purple-400","ring-yellow-400","ring-gray-400"));
-    btn.classList.add("ring-2","ring-offset-1","ring-purple-400");
+    document.querySelectorAll(".pay-btn").forEach(b => b.classList.remove("pay-btn-selected"));
+    btn.classList.add("pay-btn-selected");
     document.querySelector("#selectedPayment").value = btn.dataset.pay;
-    const isCash = btn.dataset.pay === "Cash";
-    document.querySelector("#cashSection").classList.toggle("hidden", !isCash);
-    if (!isCash) document.querySelector("#amountPaid").value = 0;
+    const isDinheiro = btn.dataset.pay === "Dinheiro";
+    document.querySelector("#cashSection").classList.toggle("hidden", !isDinheiro);
+    if (!isDinheiro) document.querySelector("#amountPaid").value = 0;
     updateChange(getTotal());
   });
 });
 
-// Product search
 let searchTimer;
 let _searchResults = [];
 document.querySelector("#saleSearch").addEventListener("input", e => {
@@ -151,19 +191,19 @@ async function searchProducts(q) {
   _searchResults = data.results;
   const container = document.querySelector("#searchResults");
   if (!data.results.length) {
-    container.innerHTML = "<p class='text-sm text-gray-400 text-center py-3'>No results</p>";
+    container.innerHTML = "<p class='text-sm text-gray-400 text-center py-3'>Nenhum resultado</p>";
     return;
   }
   container.innerHTML = data.results.map((p, i) => `
-    <div class="flex items-center justify-between p-3 border rounded-xl hover:bg-purple-50 cursor-pointer transition-colors"
+    <div class="flex items-center justify-between p-3 border border-gray-100 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors"
          onclick="addToCart(_searchResults[${i}])">
       <div>
         <p class="font-medium text-sm text-gray-800">${escHtml(p.product_name)}</p>
-        <p class="text-xs text-gray-400">${escHtml(p.sku)}${p.size?' · '+escHtml(p.size):''}${p.color?' · '+escHtml(p.color):''}</p>
+        <p class="text-xs text-gray-400">${escHtml(p.base_sku)}${p.size?' · '+escHtml(p.size):''}${p.color?' · '+escHtml(p.color):''}</p>
       </div>
       <div class="text-right">
         <p class="font-bold text-sm text-gray-800">${mzn(p.price)}</p>
-        <p class="text-xs ${p.stock>0?'text-green-600':'text-red-500'}">${p.stock>0?p.stock+' in stock':'Out of stock'}</p>
+        <p class="text-xs ${p.stock>0?'text-green-600':'text-red-500'}">${p.stock>0?p.stock+' em stock':'Esgotado'}</p>
       </div>
     </div>
   `).join("");
@@ -174,7 +214,7 @@ function addToCart(item) {
   const cart = getCart();
   const existing = cart.find(x => x.variant_id === item.id);
   if (existing) { existing.quantity += 1; }
-  else { cart.push({ variant_id: item.id, name: item.product_name, sku: item.sku, size: item.size, color: item.color, price: item.price, quantity: 1, discount_percent: 0 }); }
+  else { cart.push({ variant_id: item.id, name: item.product_name, sku: item.base_sku, size: item.size, color: item.color, price: item.price, quantity: 1, discount_percent: 0 }); }
   saveCart(cart);
   renderCart();
   document.querySelector("#saleSearch").value = "";
@@ -184,89 +224,70 @@ function addToCart(item) {
 function renderCart() {
   const cart = getCart();
   const container = document.querySelector("#cartItems");
-
   if (!cart.length) {
-    container.innerHTML = `<div class="flex flex-col items-center justify-center h-24 text-gray-400">
-      <span class="text-3xl">🛒</span><p class="text-sm mt-1">Select a product to continue</p>
+    container.innerHTML = `<div class="flex flex-col items-center justify-center h-32 text-gray-400">
+      <i data-lucide="shopping-cart" class="w-8 h-8 text-gray-300"></i><p class="text-sm mt-2">Seleccione um produto para continuar</p>
     </div>`;
-    updateTotals(0,0,0);
+    updateTotals(0,0,0,0);
+    lucide.createIcons();
     return;
   }
-
   let subtotal = 0, discountTotal = 0;
   const flatDisc = Math.max(0, Number(document.querySelector("#flatDiscount").value || 0));
-
   container.innerHTML = cart.map((item, i) => {
     const gross = item.price * item.quantity;
     const disc = gross * (item.discount_percent || 0) / 100;
     const net = gross - disc;
     subtotal += gross; discountTotal += disc;
     return `
-    <div class="flex items-start gap-3 p-3 border rounded-xl">
+    <div class="flex items-start gap-3 p-3 border border-gray-100 rounded-xl bg-white">
       <div class="flex-1 min-w-0">
         <p class="font-medium text-sm text-gray-800 truncate">${escHtml(item.name)}</p>
         <p class="text-xs text-gray-400">${escHtml(item.sku)}${item.size?' · '+escHtml(item.size):''}${item.color?' · '+escHtml(item.color):''}</p>
         <div class="flex items-center gap-3 mt-2">
-          <div class="flex items-center border rounded-lg overflow-hidden text-sm">
-            <button onclick="changeQty(${i},-1)" class="px-2 py-1 bg-gray-50 hover:bg-gray-100">−</button>
-            <input type="number" min="1" value="${item.quantity}"
-              onchange="setQty(${i}, this.value)"
-              onclick="this.select()"
-              class="w-12 py-1 text-center border-x text-sm focus:outline-none focus:bg-purple-50" />
-            <button onclick="changeQty(${i},1)" class="px-2 py-1 bg-gray-50 hover:bg-gray-100">+</button>
+          <div class="flex items-center border border-gray-200 rounded-lg overflow-hidden text-sm">
+            <button onclick="changeQty(${i},-1)" class="px-2 py-1 bg-gray-50 hover:bg-gray-100 text-gray-600">−</button>
+            <input type="number" min="1" value="${item.quantity}" onchange="setQty(${i}, this.value)" onclick="this.select()"
+              class="w-10 py-1 text-center text-sm focus:outline-none" />
+            <button onclick="changeQty(${i},1)" class="px-2 py-1 bg-gray-50 hover:bg-gray-100 text-gray-600">+</button>
           </div>
           <div class="flex items-center gap-1 text-xs text-gray-500">
-            <span>Disc.</span>
-            <input type="number" min="0" max="100" value="${item.discount_percent||0}"
-              onchange="setDiscount(${i}, this.value)"
-              class="w-12 p-1 border rounded text-center text-xs focus:outline-none focus:ring-1 focus:ring-purple-300" />
+            <span>Desc.</span>
+            <input type="number" min="0" max="100" value="${item.discount_percent||0}" onchange="setDiscount(${i}, this.value)"
+              class="w-10 p-1 border border-gray-200 rounded text-center text-xs focus:outline-none focus:ring-1 focus:ring-purple-300" />
             <span>%</span>
           </div>
         </div>
       </div>
       <div class="text-right flex-shrink-0">
         ${disc>0?`<p class="text-xs text-gray-300 line-through">${mzn(gross)}</p>`:''}
-        <p class="font-bold text-sm">${mzn(net)}</p>
-        <button onclick="removeFromCart(${i})" class="text-gray-300 hover:text-red-500 text-lg leading-none mt-1">✕</button>
+        <p class="font-bold text-sm text-gray-800">${mzn(net)}</p>
+        <button onclick="removeFromCart(${i})" class="text-gray-300 hover:text-red-500 mt-1 inline-flex transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
     </div>`;
   }).join("");
-
   const effectiveFlat = Math.min(flatDisc, Math.max(0, subtotal - discountTotal));
   updateTotals(subtotal, discountTotal, effectiveFlat, subtotal - discountTotal - effectiveFlat);
+  lucide.createIcons();
 }
 
 function updateTotals(sub, disc, flat, total) {
   document.querySelector("#cartSubtotal").textContent = mzn(sub);
   document.querySelector("#cartTotal").textContent = mzn(total);
-  const discRow = document.querySelector("#discountRow");
-  discRow.classList.toggle("hidden", disc === 0);
+  document.querySelector("#discountRow").classList.toggle("hidden", disc === 0);
   document.querySelector("#cartDiscount").textContent = Number(disc).toLocaleString("pt-MZ",{minimumFractionDigits:2,maximumFractionDigits:2});
-  const flatRow = document.querySelector("#flatDiscountRow");
-  flatRow.classList.toggle("hidden", flat === 0);
+  document.querySelector("#flatDiscountRow").classList.toggle("hidden", flat === 0);
   document.querySelector("#cartFlatDiscount").textContent = Number(flat).toLocaleString("pt-MZ",{minimumFractionDigits:2,maximumFractionDigits:2});
   updateChange(total);
 }
-
 function updateChange(total) {
   const paid = Number(document.querySelector("#amountPaid").value || 0);
-  const change = Math.max(0, paid - (total || 0));
-  document.querySelector("#changeDisplay").textContent = mzn(change);
+  document.querySelector("#changeDisplay").textContent = mzn(Math.max(0, paid - (total || 0)));
 }
-
-function changeQty(i, delta) {
-  const c = getCart(); c[i].quantity = Math.max(1, c[i].quantity + delta); saveCart(c); renderCart();
-}
-function setQty(i, val) {
-  const c = getCart(); c[i].quantity = Math.max(1, parseInt(val) || 1); saveCart(c); renderCart();
-}
-function setDiscount(i, val) {
-  const c = getCart(); c[i].discount_percent = Math.max(0, Math.min(100, Number(val))); saveCart(c); renderCart();
-}
-function removeFromCart(i) {
-  const c = getCart(); c.splice(i, 1); saveCart(c); renderCart();
-}
-
+function changeQty(i, delta) { const c = getCart(); c[i].quantity = Math.max(1, c[i].quantity + delta); saveCart(c); renderCart(); }
+function setQty(i, val) { const c = getCart(); c[i].quantity = Math.max(1, parseInt(val) || 1); saveCart(c); renderCart(); }
+function setDiscount(i, val) { const c = getCart(); c[i].discount_percent = Math.max(0, Math.min(100, Number(val))); saveCart(c); renderCart(); }
+function removeFromCart(i) { const c = getCart(); c.splice(i, 1); saveCart(c); renderCart(); }
 function getTotal() {
   const cart = getCart();
   const sub = cart.reduce((s,x) => s + x.price * x.quantity, 0);
@@ -281,57 +302,53 @@ document.querySelector("#flatDiscount").addEventListener("input", () => renderCa
 async function checkout() {
   const cart = getCart();
   if (!cart.length) return;
-
   const btn = document.querySelector("#btnCheckout");
-  btn.disabled = true; btn.textContent = "Processing…";
-
+  btn.disabled = true; btn.innerHTML = '<i data-lucide="loader-circle" class="w-4 h-4 animate-spin"></i> A processar…';
+  lucide.createIcons();
   const total = getTotal();
   const paymentMethod = document.querySelector("#selectedPayment").value;
-  const isCash = paymentMethod === "Cash";
-  const amountPaid = isCash ? Number(document.querySelector("#amountPaid").value || 0) : total;
-
-  if (isCash && amountPaid < total) {
-    showToast(`Amount received (${mzn(amountPaid)}) is less than the total (${mzn(total)}).`, "warning");
-    btn.disabled = false; btn.textContent = "Complete Sale";
-    return;
+  const isDinheiro = paymentMethod === "Dinheiro";
+  const amountPaid = isDinheiro ? Number(document.querySelector("#amountPaid").value || 0) : total;
+  if (isDinheiro && amountPaid < total) {
+    showToast(`Montante recebido (${mzn(amountPaid)}) é inferior ao total (${mzn(total)}).`, 'amber');
+    btn.disabled = false; btn.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i> Registar Venda';
+    lucide.createIcons(); return;
   }
-
   const payload = {
-    payment_method: paymentMethod,
-    amount_paid: amountPaid,
+    payment_method: paymentMethod, amount_paid: amountPaid,
     flat_discount: Math.max(0, Number(document.querySelector("#flatDiscount").value || 0)),
     location: document.querySelector("#saleLocation").value,
     customer_name: document.querySelector("#customerName").value,
     items: cart.map(x => ({ variant_id: x.variant_id, quantity: x.quantity, discount_percent: x.discount_percent || 0 })),
   };
-
   try {
     const res = await fetch(`/${SLUG}/api/sale`, { method:"POST", headers: csrfHeaders(), body:JSON.stringify(payload) });
     const data = await res.json();
-
-    if (!res.ok || data.error) {
-      showToast("Error: " + (data.error || "Unknown error"), "error"); return;
-    }
-
+    if (!res.ok || data.error) { showToast("Erro: " + (data.error || "Erro desconhecido"), 'red'); return; }
     clearCart();
     document.querySelector("#flatDiscount").value = 0;
     renderCart();
-    document.querySelector("#receiptSub").textContent = `Sale #${data.sale_id} · ${data.payment_method}`;
+    document.querySelector("#receiptSub").textContent = `Venda #${data.sale_id} · ${data.payment_method}`;
     document.querySelector("#receiptBody").innerHTML = `
       <div class="flex justify-between"><span class="text-gray-500">Subtotal</span><span>${mzn(data.subtotal)}</span></div>
-      ${data.discount_total > 0 ? `<div class="flex justify-between text-red-500"><span>Item discounts</span><span>−${mzn(data.discount_total)}</span></div>` : ""}
-      ${data.flat_discount > 0 ? `<div class="flex justify-between text-red-500"><span>General discount</span><span>−${mzn(data.flat_discount)}</span></div>` : ""}
+      ${data.discount_total > 0 ? `<div class="flex justify-between text-red-500"><span>Desconto artigos</span><span>−${mzn(data.discount_total)}</span></div>` : ""}
+      ${data.flat_discount > 0 ? `<div class="flex justify-between text-red-500"><span>Desconto geral</span><span>−${mzn(data.flat_discount)}</span></div>` : ""}
       <div class="flex justify-between font-bold border-t pt-1"><span>Total</span><span>${mzn(data.total)}</span></div>
-      ${data.amount_paid > 0 ? `<div class="flex justify-between text-gray-500"><span>Received</span><span>${mzn(data.amount_paid)}</span></div>` : ""}
-      ${data.change > 0 ? `<div class="flex justify-between text-green-600 font-medium"><span>Change</span><span>${mzn(data.change)}</span></div>` : ""}
-    `;
+      ${data.amount_paid > 0 ? `<div class="flex justify-between text-gray-500"><span>Recebido</span><span>${mzn(data.amount_paid)}</span></div>` : ""}
+      ${data.change > 0 ? `<div class="flex justify-between text-green-600 font-medium"><span>Troco</span><span>${mzn(data.change)}</span></div>` : ""}`;
     document.querySelector("#receiptModal").classList.remove("hidden");
-    if (window.lucide) lucide.createIcons();
-  } catch { showToast("Network error. Please try again.", "error"); }
-  finally { btn.disabled = false; btn.textContent = "Complete Sale"; }
+  } catch { showToast("Erro de rede. Tente novamente.", 'red'); }
+  finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i> Registar Venda';
+    lucide.createIcons();
+  }
 }
 
 document.querySelector("#btnCheckout").addEventListener("click", checkout);
-document.addEventListener("DOMContentLoaded", () => { renderCart(); if (window.lucide) lucide.createIcons(); });
+document.addEventListener("DOMContentLoaded", () => {
+  renderCart();
+  document.querySelector('.pay-btn[data-pay="Dinheiro"]').click();
+});
 </script>
 {% endblock %}

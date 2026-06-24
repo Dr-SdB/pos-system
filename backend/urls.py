@@ -14,6 +14,7 @@ tenant_urlpatterns = [
     path("restock/", v.page_restock, name="restock"),
     path("adjustments/", v.page_adjustments, name="adjustments"),
     path("employees/", v.page_employees, name="employees"),
+    path("change-password/", v.change_password, name="change_password"),
 
     # APIs
     path("api/dashboard", v.dashboard),
@@ -26,6 +27,7 @@ tenant_urlpatterns = [
     path("api/sales", v.sales_history),
     path("api/sales/<int:sale_id>/void", v.void_sale),
     path("api/sales/export", v.export_csv),
+    path("api/catalogue/history", v.catalogue_history),
     path("api/adjustments", v.save_adjustments),
     path("api/adjustments/history", v.adjustment_history),
     path("api/restock", v.api_restock),

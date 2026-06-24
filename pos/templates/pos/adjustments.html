@@ -1,170 +1,414 @@
 {% extends "pos/base.html" %}
 {% load static %}
-{% block title %}Adjustment History{% endblock %}
+{% block title %}Ajustes & Catálogo{% endblock %}
 {% block nav_adjustments %}active{% endblock %}
-{% block page_title %}Stock Adjustment History{% endblock %}
+{% block page_title %}Ajustes & Alterações de Catálogo{% endblock %}
 
 {% block content %}
-<div class="space-y-5">
+<div class="space-y-4">
 
-  <!-- Stats -->
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="adjStats"></div>
-
-  <!-- Filters -->
-  <div class="bg-white rounded-xl border shadow-sm p-4 flex flex-wrap gap-3 items-end">
-    <div>
-      <label class="block text-xs font-medium text-gray-500 mb-1">From</label>
-      <input type="date" id="filterFrom" class="p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
-    </div>
-    <div>
-      <label class="block text-xs font-medium text-gray-500 mb-1">To</label>
-      <input type="date" id="filterTo" class="p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-300" />
-    </div>
-    <div>
-      <label class="block text-xs font-medium text-gray-500 mb-1">Reason</label>
-      <select id="filterReason" class="p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-300 bg-white">
-        <option value="">All</option>
-        <option>Damage</option>
-        <option>Loss</option>
-        <option>Theft</option>
-        <option>Restock</option>
-        <option>Restocked</option>
-        <option>Voided</option>
-        <option>Other</option>
-      </select>
-    </div>
-    <button onclick="loadHistory()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors">Filter</button>
-    <button onclick="clearFilters()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors">Clear</button>
+  <!-- Tabs -->
+  <div class="flex gap-2">
+    <button onclick="switchTab('stock')" id="tabStock"
+      class="tab-primary px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-1.5">
+      <i data-lucide="minus-circle" class="w-4 h-4"></i> Ajustes de Stock
+    </button>
+    <button onclick="switchTab('catalogue')" id="tabCatalogue"
+      class="bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-1.5">
+      <i data-lucide="history" class="w-4 h-4"></i> Alterações de Catálogo
+    </button>
   </div>
 
-  <!-- Truncation notice -->
-  <div id="adjTruncNotice" class="hidden bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-700">
-    Showing <span id="adjShowing"></span> of <span id="adjTotal"></span> records. Use filters to refine.
+  <!-- ===== STOCK ADJUSTMENTS TAB ===== -->
+  <div id="panelStock" class="space-y-4">
+
+    <!-- KPI cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="adjStockStats">
+      {% for i in "abcd" %}
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <div class="skel h-5 w-20 mb-3"></div>
+        <div class="skel h-7 w-12 mb-2"></div>
+        <div class="skel h-3 w-28"></div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div class="flex flex-wrap gap-4 items-end">
+        <div class="space-y-1.5">
+          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">De</label>
+          <div class="relative">
+            <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
+            <input type="date" id="adjFrom" class="pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-200" />
+          </div>
+        </div>
+        <div class="space-y-1.5">
+          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Até</label>
+          <div class="relative">
+            <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
+            <input type="date" id="adjTo" class="pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-200" />
+          </div>
+        </div>
+        <div class="space-y-1.5 flex-1 min-w-36">
+          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Motivo</label>
+          <select id="adjReason" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-200 bg-white">
+            <option value="">Todos</option>
+            <option>Dano</option>
+            <option>Perda</option>
+            <option>Roubo</option>
+            <option>Outro</option>
+          </select>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="loadAdjustments()" style="background:var(--primary)"
+            class="px-4 py-2 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2">
+            <i data-lucide="filter" class="w-4 h-4"></i> Filtrar
+          </button>
+          <button onclick="clearAdjFilters()"
+            class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium rounded-lg transition-colors">
+            Limpar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-100">
+              <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Produto</th>
+              <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden sm:table-cell">SKU</th>
+              <th class="text-center px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Motivo</th>
+              <th class="text-right px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Qtd</th>
+              <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden md:table-cell">Utilizador</th>
+              <th class="text-right px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Data</th>
+            </tr>
+          </thead>
+          <tbody id="adjTable" class="divide-y divide-gray-50">
+            {% for i in "abc" %}
+            <tr>
+              <td class="px-5 py-3.5"><div class="skel h-4 w-32"></div></td>
+              <td class="px-5 py-3.5 hidden sm:table-cell"><div class="skel h-4 w-16"></div></td>
+              <td class="px-5 py-3.5"><div class="skel h-5 w-14 mx-auto rounded-full"></div></td>
+              <td class="px-5 py-3.5"><div class="skel h-4 w-8 ml-auto"></div></td>
+              <td class="px-5 py-3.5 hidden md:table-cell"><div class="skel h-4 w-20"></div></td>
+              <td class="px-5 py-3.5"><div class="skel h-4 w-24 ml-auto"></div></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div id="adjEmpty" class="hidden text-center py-16 text-gray-400">
+        <i data-lucide="clipboard-list" class="w-12 h-12 mx-auto mb-3 text-gray-300"></i>
+        <p class="text-sm">Nenhum ajuste encontrado.</p>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Table -->
-  <div class="bg-white rounded-xl border shadow-sm overflow-hidden">
-    <table class="w-full text-sm">
-      <thead class="bg-gray-50 border-b">
-        <tr>
-          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Date</th>
-          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Product</th>
-          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden sm:table-cell">SKU</th>
-          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">Size</th>
-          <th class="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase hidden md:table-cell">Color</th>
-          <th class="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Reason</th>
-          <th class="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Quantity</th>
-        </tr>
-      </thead>
-      <tbody id="adjTable" class="divide-y divide-gray-50"></tbody>
-    </table>
-    <div id="adjEmpty" class="hidden text-center py-16 text-gray-400">
-      <p class="text-4xl mb-2">📋</p>
-      <p class="text-lg font-medium">No adjustments found</p>
+  <!-- ===== CATALOGUE CHANGES TAB ===== -->
+  <div id="panelCatalogue" class="space-y-4 hidden">
+
+    <!-- KPI cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="catStatsRow">
+      {% for i in "abcd" %}
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <div class="skel h-5 w-20 mb-3"></div>
+        <div class="skel h-7 w-12 mb-2"></div>
+        <div class="skel h-3 w-28"></div>
+      </div>
+      {% endfor %}
     </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div class="flex flex-wrap gap-4 items-end">
+        <div class="space-y-1.5">
+          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">De</label>
+          <div class="relative">
+            <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
+            <input type="date" id="catFrom" class="pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-200" />
+          </div>
+        </div>
+        <div class="space-y-1.5">
+          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Até</label>
+          <div class="relative">
+            <i data-lucide="calendar" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"></i>
+            <input type="date" id="catTo" class="pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-200" />
+          </div>
+        </div>
+        <div class="space-y-1.5 flex-1 min-w-44">
+          <label class="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Tipo de alteração</label>
+          <select id="catAction" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-purple-200 bg-white">
+            <option value="">Todas</option>
+            <option>Preço alterado</option>
+            <option>Stock definido</option>
+            <option>Artigo eliminado</option>
+            <option>Nome alterado</option>
+            <option>Categoria alterada</option>
+          </select>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="loadCatalogueHistory()" style="background:var(--primary)"
+            class="px-4 py-2 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2">
+            <i data-lucide="filter" class="w-4 h-4"></i> Filtrar
+          </button>
+          <button onclick="clearCatFilters()"
+            class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium rounded-lg transition-colors">
+            Limpar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-100">
+              <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Produto</th>
+              <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden sm:table-cell">SKU</th>
+              <th class="text-center px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Alteração</th>
+              <th class="text-right px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden md:table-cell">Antes</th>
+              <th class="text-right px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden md:table-cell">Depois</th>
+              <th class="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden lg:table-cell">Utilizador</th>
+              <th class="text-right px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Data</th>
+            </tr>
+          </thead>
+          <tbody id="catTable" class="divide-y divide-gray-50">
+            {% for i in "abc" %}
+            <tr>
+              <td class="px-5 py-3.5"><div class="skel h-4 w-32"></div></td>
+              <td class="px-5 py-3.5 hidden sm:table-cell"><div class="skel h-4 w-16"></div></td>
+              <td class="px-5 py-3.5"><div class="skel h-5 w-24 mx-auto rounded-full"></div></td>
+              <td class="px-5 py-3.5 hidden md:table-cell"><div class="skel h-4 w-16 ml-auto"></div></td>
+              <td class="px-5 py-3.5 hidden md:table-cell"><div class="skel h-4 w-16 ml-auto"></div></td>
+              <td class="px-5 py-3.5 hidden lg:table-cell"><div class="skel h-4 w-20"></div></td>
+              <td class="px-5 py-3.5"><div class="skel h-4 w-24 ml-auto"></div></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div id="catEmpty" class="hidden text-center py-16 text-gray-400">
+        <i data-lucide="history" class="w-12 h-12 mx-auto mb-3 text-gray-300"></i>
+        <p class="text-sm">Nenhuma alteração de catálogo encontrada.</p>
+      </div>
+    </div>
+
   </div>
 
 </div>
 {% endblock %}
 
 {% block scripts %}
+<style>
+  .tab-primary { background: var(--primary); color: #fff; }
+</style>
 <script>
 const REASON_COLORS = {
-  "Damage":    "bg-orange-100 text-orange-700",
-  "Loss":      "bg-yellow-100 text-yellow-700",
-  "Theft":     "bg-red-100 text-red-700",
-  "Restock":   "bg-purple-100 text-purple-700",
-  "Restocked": "bg-green-100 text-green-700",
-  "Voided":    "bg-amber-100 text-amber-700",
-  "Other":     "bg-gray-100 text-gray-600",
+  Dano:"bg-orange-100 text-orange-700", Perda:"bg-yellow-100 text-yellow-700",
+  Roubo:"bg-red-100 text-red-700", Outro:"bg-gray-100 text-gray-500",
+};
+const ACTION_COLORS = {
+  "Preço alterado":"bg-blue-100 text-blue-700",
+  "Stock definido":"bg-green-100 text-green-700",
+  "Artigo eliminado":"bg-red-100 text-red-700",
+  "Nome alterado":"bg-purple-100 text-purple-700",
+  "Categoria alterada":"bg-yellow-100 text-yellow-700",
 };
 
-async function loadHistory() {
-  const params = new URLSearchParams();
-  const from = document.querySelector("#filterFrom").value;
-  const to = document.querySelector("#filterTo").value;
-  const reason = document.querySelector("#filterReason").value;
-  if (from) params.set("from", from);
-  if (to) params.set("to", to);
-  if (reason) params.set("reason", reason);
-
-  const res = await fetch(`/${SLUG}/api/adjustments/history?${params}`);
-  const data = await res.json();
-  renderTable(data);
+function switchTab(tab) {
+  document.querySelector("#panelStock").classList.toggle("hidden", tab!=="stock");
+  document.querySelector("#panelCatalogue").classList.toggle("hidden", tab!=="catalogue");
+  const inactive = "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-1.5";
+  const active   = "tab-primary px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-1.5";
+  document.querySelector("#tabStock").className       = tab==="stock"      ? active : inactive;
+  document.querySelector("#tabCatalogue").className   = tab==="catalogue"  ? active : inactive;
+  if (tab === "catalogue") loadCatalogueHistory();
 }
 
-function renderTable({ results: rows, total, showing, total_removed, total_added }) {
-  const tbody = document.querySelector("#adjTable");
-  const empty = document.querySelector("#adjEmpty");
-  const stats = document.querySelector("#adjStats");
+/* ======= STOCK ADJUSTMENTS ======= */
+async function loadAdjustments() {
+  const from   = document.querySelector("#adjFrom").value;
+  const to     = document.querySelector("#adjTo").value;
+  const reason = document.querySelector("#adjReason").value;
+  const params = new URLSearchParams();
+  if (from)   params.set("from", from);
+  if (to)     params.set("to", to);
+  if (reason) params.set("reason", reason);
+  const res  = await fetch(`/${SLUG}/api/adjustments?${params}`);
+  const data = await res.json();
+  renderAdjStats(data.summary);
+  renderAdjTable(data.results);
+}
 
-  // Truncation notice
-  const notice = document.querySelector("#adjTruncNotice");
-  if (showing < total) {
-    document.querySelector("#adjShowing").textContent = showing;
-    document.querySelector("#adjTotal").textContent = total;
-    notice.classList.remove("hidden");
-  } else {
-    notice.classList.add("hidden");
-  }
-
-  // Top reason (from removal rows only)
-  const byReason = {};
-  rows.filter(r => r.quantity < 0).forEach(r => { byReason[r.reason] = (byReason[r.reason] || 0) + 1; });
-  const topReason = Object.entries(byReason).sort((a,b) => b[1]-a[1])[0];
-
-  stats.innerHTML = `
-    <div class="bg-white rounded-xl border shadow-sm p-4">
-      <p class="text-2xl font-bold text-gray-800">${total}</p>
-      <p class="text-xs text-gray-500 mt-0.5">Total records</p>
+function renderAdjStats(s) {
+  if (!s) return;
+  document.querySelector("#adjStockStats").innerHTML = `
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Total ajustes</p>
+        <div class="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center"><i data-lucide="minus-circle" class="w-4 h-4 text-purple-500"></i></div>
+      </div>
+      <p class="text-2xl font-bold text-gray-900">${s.total_adjustments||0}</p>
+      <p class="text-xs text-gray-400 mt-1">no período filtrado</p>
     </div>
-    <div class="bg-white rounded-xl border shadow-sm p-4">
-      <p class="text-2xl font-bold text-red-500">${total_removed}</p>
-      <p class="text-xs text-gray-500 mt-0.5">Units removed</p>
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Unidades removidas</p>
+        <div class="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center"><i data-lucide="trending-down" class="w-4 h-4 text-red-500"></i></div>
+      </div>
+      <p class="text-2xl font-bold text-gray-900">${s.total_units||0}</p>
+      <p class="text-xs text-gray-400 mt-1">unidades em total</p>
     </div>
-    <div class="bg-white rounded-xl border shadow-sm p-4">
-      <p class="text-2xl font-bold text-purple-600">${topReason ? topReason[0] : "–"}</p>
-      <p class="text-xs text-gray-500 mt-0.5">Top reason</p>
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Motivo principal</p>
+        <div class="w-9 h-9 rounded-lg bg-orange-50 flex items-center justify-center"><i data-lucide="alert-circle" class="w-4 h-4 text-orange-500"></i></div>
+      </div>
+      <p class="text-xl font-bold text-gray-900">${s.top_reason||"–"}</p>
+      <p class="text-xs text-gray-400 mt-1">mais frequente</p>
     </div>
-    <div class="bg-white rounded-xl border shadow-sm p-4">
-      <p class="text-2xl font-bold text-green-600">${total_added}</p>
-      <p class="text-xs text-gray-500 mt-0.5">Units restocked</p>
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Utilizadores</p>
+        <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center"><i data-lucide="users" class="w-4 h-4 text-blue-500"></i></div>
+      </div>
+      <p class="text-2xl font-bold text-gray-900">${s.unique_users||0}</p>
+      <p class="text-xs text-gray-400 mt-1">com registos</p>
     </div>
   `;
+  lucide.createIcons();
+}
 
+function renderAdjTable(rows) {
+  const tbody = document.querySelector("#adjTable");
   tbody.innerHTML = "";
-
-  if (!rows.length) { empty.classList.remove("hidden"); return; }
-  empty.classList.add("hidden");
-
+  if (!rows.length) { document.querySelector("#adjEmpty").classList.remove("hidden"); lucide.createIcons(); return; }
+  document.querySelector("#adjEmpty").classList.add("hidden");
   rows.forEach(r => {
+    const badgeCls = REASON_COLORS[r.reason]||"bg-gray-100 text-gray-500";
     const tr = document.createElement("tr");
     tr.className = "hover:bg-gray-50 transition-colors";
-    const colorClass = REASON_COLORS[r.reason] || REASON_COLORS["Other"];
     tr.innerHTML = `
-      <td class="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">${escHtml(r.date)}</td>
-      <td class="px-4 py-3 font-medium text-gray-800">${escHtml(r.product_name)}</td>
-      <td class="px-4 py-3 font-mono text-xs text-gray-400 hidden sm:table-cell">${escHtml(r.sku)}</td>
-      <td class="px-4 py-3 text-gray-500 hidden md:table-cell">${escHtml(r.size||"–")}</td>
-      <td class="px-4 py-3 text-gray-500 hidden md:table-cell">${escHtml(r.color||"–")}</td>
-      <td class="px-4 py-3 text-center">
-        <span class="text-xs font-semibold px-2 py-1 rounded-full ${colorClass}">${escHtml(r.reason)}</span>
+      <td class="px-5 py-3.5">
+        <p class="font-medium text-gray-800 text-sm">${escHtml(r.product_name)}</p>
+        ${r.size||r.color?`<p class="text-xs text-gray-400 mt-0.5">${[r.size,r.color].filter(Boolean).join(' · ')}</p>`:""}
       </td>
-      <td class="px-4 py-3 text-right font-bold ${r.quantity < 0 ? "text-red-500" : "text-green-600"}">
-        ${r.quantity > 0 ? "+" : ""}${r.quantity}
+      <td class="px-5 py-3.5 font-mono text-xs text-gray-400 hidden sm:table-cell">${escHtml(r.variant_sku||"–")}</td>
+      <td class="px-5 py-3.5 text-center">
+        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${badgeCls}">${escHtml(r.reason)}</span>
       </td>
+      <td class="px-5 py-3.5 text-right font-semibold text-red-600 text-sm">−${r.quantity}</td>
+      <td class="px-5 py-3.5 text-sm text-gray-500 hidden md:table-cell">${escHtml(r.adjusted_by||"–")}</td>
+      <td class="px-5 py-3.5 text-right text-xs text-gray-400 whitespace-nowrap">${r.created_at}</td>
     `;
     tbody.appendChild(tr);
   });
+  lucide.createIcons();
 }
 
-function clearFilters() {
-  document.querySelector("#filterFrom").value = "";
-  document.querySelector("#filterTo").value = "";
-  document.querySelector("#filterReason").value = "";
-  loadHistory();
+function clearAdjFilters() {
+  document.querySelector("#adjFrom").value = "";
+  document.querySelector("#adjTo").value = "";
+  document.querySelector("#adjReason").value = "";
+  loadAdjustments();
 }
 
-document.addEventListener("DOMContentLoaded", loadHistory);
+/* ======= CATALOGUE HISTORY ======= */
+async function loadCatalogueHistory() {
+  const from   = document.querySelector("#catFrom").value;
+  const to     = document.querySelector("#catTo").value;
+  const action = document.querySelector("#catAction").value;
+  const params = new URLSearchParams();
+  if (from)   params.set("from", from);
+  if (to)     params.set("to", to);
+  if (action) params.set("action", action);
+  const res  = await fetch(`/${SLUG}/api/catalogue/history?${params}`);
+  const data = await res.json();
+  renderCatStats(data);
+  renderCatTable(data.results);
+}
+
+function renderCatStats(data) {
+  const rows = data.results || [];
+  const byAction = {};
+  rows.forEach(r => { byAction[r.action] = (byAction[r.action]||0) + 1; });
+  const editors = [...new Set(rows.map(r=>r.changed_by))].length;
+  document.querySelector("#catStatsRow").innerHTML = `
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Total de alterações</p>
+        <div class="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center"><i data-lucide="history" class="w-4 h-4 text-purple-500"></i></div>
+      </div>
+      <p class="text-2xl font-bold text-gray-900">${data.total||0}</p>
+      <p class="text-xs text-gray-400 mt-1">no período filtrado</p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Preços alterados</p>
+        <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center"><i data-lucide="tag" class="w-4 h-4 text-blue-500"></i></div>
+      </div>
+      <p class="text-2xl font-bold text-gray-900">${byAction["Preço alterado"]||0}</p>
+      <p class="text-xs text-gray-400 mt-1">no período</p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Eliminações</p>
+        <div class="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center"><i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i></div>
+      </div>
+      <p class="text-2xl font-bold text-gray-900">${byAction["Artigo eliminado"]||0}</p>
+      <p class="text-xs text-gray-400 mt-1">artigos removidos</p>
+    </div>
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Editores</p>
+        <div class="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center"><i data-lucide="users" class="w-4 h-4 text-green-500"></i></div>
+      </div>
+      <p class="text-2xl font-bold text-gray-900">${editors}</p>
+      <p class="text-xs text-gray-400 mt-1">utilizadores activos</p>
+    </div>
+  `;
+  lucide.createIcons();
+}
+
+function renderCatTable(rows) {
+  const tbody = document.querySelector("#catTable");
+  tbody.innerHTML = "";
+  if (!rows.length) { document.querySelector("#catEmpty").classList.remove("hidden"); lucide.createIcons(); return; }
+  document.querySelector("#catEmpty").classList.add("hidden");
+  rows.forEach(r => {
+    const badgeCls = ACTION_COLORS[r.action]||"bg-gray-100 text-gray-500";
+    const tr = document.createElement("tr");
+    tr.className = "hover:bg-gray-50 transition-colors";
+    tr.innerHTML = `
+      <td class="px-5 py-3.5 font-medium text-gray-800 text-sm">${escHtml(r.product_name)}</td>
+      <td class="px-5 py-3.5 font-mono text-xs text-gray-400 hidden sm:table-cell">${escHtml(r.variant_sku)}</td>
+      <td class="px-5 py-3.5 text-center">
+        <span class="inline-block px-2.5 py-1 rounded-full text-xs font-semibold ${badgeCls}">${escHtml(r.action)}</span>
+      </td>
+      <td class="px-5 py-3.5 text-right text-sm text-gray-500 hidden md:table-cell">${escHtml(r.old_value||"–")}</td>
+      <td class="px-5 py-3.5 text-right text-sm font-medium text-gray-800 hidden md:table-cell">${escHtml(r.new_value||"–")}</td>
+      <td class="px-5 py-3.5 text-sm text-gray-500 hidden lg:table-cell">${escHtml(r.changed_by)}</td>
+      <td class="px-5 py-3.5 text-right text-xs text-gray-400 whitespace-nowrap">${r.created_at}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  lucide.createIcons();
+}
+
+function clearCatFilters() {
+  document.querySelector("#catFrom").value = "";
+  document.querySelector("#catTo").value = "";
+  document.querySelector("#catAction").value = "";
+  loadCatalogueHistory();
+}
+
+document.addEventListener("DOMContentLoaded", loadAdjustments);
 </script>
 {% endblock %}

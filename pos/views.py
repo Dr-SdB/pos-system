@@ -9,13 +9,15 @@ from functools import wraps
 from django.db import transaction
 from django.utils.timezone import localtime, now as tz_now
 from django.db.models import Q, Sum, Count
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, StreamingHttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django_ratelimit.decorators import ratelimit
 
 from django.contrib.auth.models import User
-from .models import Product, ProductVariant, Sale, SaleItem, Tenant
+from .models import Product, ProductVariant, Sale, SaleItem, Tenant, CatalogueChangeLog
 
 
 # ── Root redirect ─────────────────────────────────────────────────────────────
@@ -324,9 +326,21 @@ def update_variant(request, variant_id, **kwargs):
     except ProductVariant.DoesNotExist:
         return JsonResponse({"error": "Not found"}, status=404)
 
+    actor = request.user.username
+
     if request.method == "DELETE":
         variant.is_active = False
         variant.save()
+        CatalogueChangeLog.objects.create(
+            tenant=request.tenant,
+            product_variant=variant,
+            variant_sku=variant.variant_sku,
+            product_name=variant.product.name,
+            action=CatalogueChangeLog.ACTION_DELETE,
+            old_value="",
+            new_value="",
+            changed_by=actor,
+        )
         return JsonResponse({"ok": True})
 
     if request.method not in ("PATCH", "PUT", "POST"):
@@ -336,16 +350,26 @@ def update_variant(request, variant_id, **kwargs):
     if data is None:
         return JsonResponse({"error": "Invalid JSON"}, status=400)
 
+    logs = []
+    old_price = variant.base_price
+    old_stock = variant.current_stock
+
     if "price" in data:
         try:
-            variant.base_price = _safe_decimal(data["price"], "price")
+            new_price = _safe_decimal(data["price"], "price")
         except ValueError as e:
             return JsonResponse({"error": str(e)}, status=400)
+        if new_price != old_price:
+            logs.append((CatalogueChangeLog.ACTION_PRICE, str(old_price), str(new_price)))
+        variant.base_price = new_price
     if "stock" in data:
         try:
-            variant.current_stock = max(0, int(data["stock"]))
+            new_stock = max(0, int(data["stock"]))
         except (ValueError, TypeError):
             return JsonResponse({"error": "Invalid stock value"}, status=400)
+        if new_stock != old_stock:
+            logs.append((CatalogueChangeLog.ACTION_STOCK, str(old_stock), str(new_stock)))
+        variant.current_stock = new_stock
     if "size" in data:
         variant.size = str(data["size"])[:50]
     if "color" in data:
@@ -354,12 +378,35 @@ def update_variant(request, variant_id, **kwargs):
         variant.unit = str(data["unit"])[:20]
     variant.save()
 
+    old_name = variant.product.name
+    old_category = variant.product.category
+    product_dirty = False
     if "product_name" in data:
-        variant.product.name = str(data["product_name"]).strip()[:255]
-        variant.product.save()
+        new_name = str(data["product_name"]).strip()[:255]
+        if new_name != old_name:
+            logs.append((CatalogueChangeLog.ACTION_NAME, old_name, new_name))
+        variant.product.name = new_name
+        product_dirty = True
     if "category" in data:
-        variant.product.category = str(data["category"]).strip()[:50]
+        new_category = str(data["category"]).strip()[:50]
+        if new_category != old_category:
+            logs.append((CatalogueChangeLog.ACTION_CATEGORY, old_category, new_category))
+        variant.product.category = new_category
+        product_dirty = True
+    if product_dirty:
         variant.product.save()
+
+    for action, old_val, new_val in logs:
+        CatalogueChangeLog.objects.create(
+            tenant=request.tenant,
+            product_variant=variant,
+            variant_sku=variant.variant_sku,
+            product_name=variant.product.name,
+            action=action,
+            old_value=old_val,
+            new_value=new_val,
+            changed_by=actor,
+        )
 
     return JsonResponse({"ok": True})
 
@@ -573,6 +620,7 @@ def create_sale(request, **kwargs):
         change_given=change_given,
     )
 
+    variants_to_update = []
     for variant, quantity, unit_price, line_gross, line_discount, line_net in validated_items:
         SaleItem.objects.create(
             sale=sale,
@@ -584,7 +632,8 @@ def create_sale(request, **kwargs):
             line_net_total=line_net,
         )
         variant.current_stock -= quantity
-        variant.save()
+        variants_to_update.append(variant)
+    ProductVariant.objects.bulk_update(variants_to_update, ["current_stock"])
 
     return JsonResponse({
         "sale_id": sale.id,
@@ -605,9 +654,19 @@ def sales_history(request, **kwargs):
     if err:
         return err
 
-    qs = Sale.objects.filter(tenant=request.tenant).prefetch_related(
-        "items__product_variant__product"
-    ).order_by("-created_at")
+    from django.db.models import Prefetch
+    qs = (
+        Sale.objects.filter(tenant=request.tenant)
+        .only(
+            "id", "created_at", "payment_method", "customer_name", "attendant",
+            "location", "subtotal_gross", "total_discount", "flat_discount",
+            "total_net", "amount_paid", "change_given",
+        )
+        .prefetch_related(
+            Prefetch("items", queryset=SaleItem.objects.select_related("product_variant__product"))
+        )
+        .order_by("-created_at")
+    )
 
     try:
         date_from = _parse_date(request.GET.get("from"), "from")
@@ -633,7 +692,7 @@ def sales_history(request, **kwargs):
     full_revenue = float(totals["total_revenue"] or 0)
 
     sales = []
-    for sale in qs[:500]:
+    for sale in qs[:50]:
         items = [
             {
                 "product_name": si.product_variant.product.name,
@@ -670,6 +729,7 @@ def sales_history(request, **kwargs):
             "total_sales": full_count,
             "total_revenue": round(full_revenue, 2),
             "showing": len(sales),
+            "truncated": full_count > 50,
         },
     })
 
@@ -717,20 +777,28 @@ def export_csv(request, **kwargs):
     except ValueError as e:
         return JsonResponse({"error": str(e)}, status=400)
 
-    qs = Sale.objects.filter(tenant=request.tenant).prefetch_related(
-        "items__product_variant__product"
-    ).order_by("-created_at")
+    # Flat SaleItem queryset — avoids loading entire Sale objects into RAM
+    item_qs = (
+        SaleItem.objects  # noqa: tenant-scope
+        .select_related("sale", "product_variant__product")
+        .filter(sale__tenant=request.tenant)
+        .order_by("-sale__created_at", "sale__id")
+    )
     if date_from:
-        qs = qs.filter(created_at__date__gte=date_from)
+        item_qs = item_qs.filter(sale__created_at__date__gte=date_from)
     if date_to:
-        qs = qs.filter(created_at__date__lte=date_to)
+        item_qs = item_qs.filter(sale__created_at__date__lte=date_to)
 
     from django.db.models import Sum, Count as DCount
-    summary = qs.aggregate(total_rev=Sum("total_net"), count=DCount("id"))
+    summary = Sale.objects.filter(tenant=request.tenant).filter(
+        **({} if not date_from else {"created_at__date__gte": date_from}),
+        **({} if not date_to   else {"created_at__date__lte": date_to}),
+    ).aggregate(total_rev=Sum("total_net"), count=DCount("id"))
     total_revenue = float(summary["total_rev"] or 0)
     sale_count = summary["count"] or 0
 
     now_local = localtime(tz_now())
+    tenant_name = request.tenant.name
     tenant_slug = request.tenant.subdomain
 
     if date_from and date_to:
@@ -748,30 +816,27 @@ def export_csv(request, **kwargs):
 
     filename = f"relatorio_vendas_{tenant_slug}_{period_slug}.csv"
 
-    response = HttpResponse(content_type="text/csv; charset=utf-8")
-    response["Content-Disposition"] = f'attachment; filename="{filename}"'
-    response.write("﻿")  # BOM for Excel UTF-8
+    class Echo:
+        """Pseudo-buffer that csv.writer can write to, returning each row as a string."""
+        def write(self, value):
+            return value
 
-    writer = csv.writer(response)
-
-    # Metadata header block
-    writer.writerow(["Relatório de Vendas"])
-    writer.writerow(["Loja:", request.tenant.name, "", "Período:", period_label])
-    writer.writerow(["Gerado em:", now_local.strftime("%d-%m-%Y %H:%M")])
-    writer.writerow([])
-
-    # Column headers - date in DD-MM-YYYY so Excel does not auto-convert it
-    writer.writerow([
-        "Venda #", "Data", "Produto", "Tamanho", "Cor", "SKU",
-        "Qtd", "Preço Unit. (MZN)", "Total Item (MZN)", "Total Venda (MZN)",
-        "Pagamento", "Local", "Atendente", "Cliente",
-    ])
-
-    for sale in qs:
-        for si in sale.items.all():
-            writer.writerow([
-                sale.id,
-                localtime(sale.created_at).strftime("%d-%m-%Y %H:%M"),
+    def generate_rows():
+        writer = csv.writer(Echo())
+        yield "﻿"  # BOM for Excel UTF-8
+        yield writer.writerow(["Relatório de Vendas"])
+        yield writer.writerow(["Loja:", tenant_name, "", "Período:", period_label])
+        yield writer.writerow(["Gerado em:", now_local.strftime("%d-%m-%Y %H:%M")])
+        yield writer.writerow([])
+        yield writer.writerow([
+            "Venda #", "Data", "Produto", "Tamanho", "Cor", "SKU",
+            "Qtd", "Preço Unit. (MZN)", "Total Item (MZN)", "Total Venda (MZN)",
+            "Pagamento", "Local", "Atendente", "Cliente",
+        ])
+        for si in item_qs.iterator(chunk_size=500):
+            yield writer.writerow([
+                si.sale_id,
+                localtime(si.sale.created_at).strftime("%d-%m-%Y %H:%M"),
                 si.product_variant.product.name,
                 si.product_variant.size or "",
                 si.product_variant.color or "",
@@ -779,18 +844,18 @@ def export_csv(request, **kwargs):
                 si.quantity,
                 f"{float(si.base_unit_price):.2f}",
                 f"{float(si.line_net_total):.2f}",
-                f"{float(sale.total_net):.2f}",
-                sale.payment_method,
-                sale.location or "Loja",
-                sale.attendant,
-                sale.customer_name,
+                f"{float(si.sale.total_net):.2f}",
+                si.sale.payment_method,
+                si.sale.location or "Loja",
+                si.sale.attendant,
+                si.sale.customer_name,
             ])
+        yield writer.writerow([])
+        yield writer.writerow(["Total de vendas:", sale_count])
+        yield writer.writerow(["Receita total (MZN):", f"{total_revenue:.2f}"])
 
-    # Summary footer
-    writer.writerow([])
-    writer.writerow(["Total de vendas:", sale_count])
-    writer.writerow(["Receita total (MZN):", f"{total_revenue:.2f}"])
-
+    response = StreamingHttpResponse(generate_rows(), content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
 
 
@@ -839,7 +904,7 @@ def page_employees(request, **kwargs):
             password = request.POST.get("password", "").strip()
             if not username:
                 error = "Nome de utilizador é obrigatório."
-            elif not re.match(r'^[a-z0-9_]+$', username):
+            elif not re.match(r'^[a-z0-9_.@+-]+$', username):
                 error = "Utilizador só pode conter letras minúsculas, números e _."
             elif not password or len(password) < 4:
                 error = "Senha deve ter pelo menos 4 caracteres."
@@ -1013,6 +1078,51 @@ def api_restock(request, **kwargs):
     return JsonResponse({"ok": True, "saved": saved})
 
 
+# ── API: Catalogue change history  GET /<tenant>/api/catalogue/history ────────
+@_staff_required
+def catalogue_history(request, **kwargs):
+    err = _require_tenant(request)
+    if err:
+        return err
+
+    qs = CatalogueChangeLog.objects.filter(tenant=request.tenant).order_by("-created_at")
+
+    try:
+        date_from = _parse_date(request.GET.get("from"), "from")
+        date_to = _parse_date(request.GET.get("to"), "to")
+    except ValueError as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+    action_filter = request.GET.get("action")
+    if date_from:
+        qs = qs.filter(created_at__date__gte=date_from)
+    if date_to:
+        qs = qs.filter(created_at__date__lte=date_to)
+    if action_filter:
+        qs = qs.filter(action=action_filter)
+
+    try:
+        offset = max(0, int(request.GET.get("offset", 0)))
+    except (ValueError, TypeError):
+        offset = 0
+
+    total = qs.count()
+    data = [
+        {
+            "id": log.id,
+            "date": localtime(log.created_at).strftime("%d-%m-%Y %H:%M"),
+            "product_name": log.product_name,
+            "sku": log.variant_sku,
+            "action": log.action,
+            "old_value": log.old_value,
+            "new_value": log.new_value,
+            "changed_by": log.changed_by,
+        }
+        for log in qs[offset:offset + 500]
+    ]
+    return JsonResponse({"results": data, "total": total, "showing": len(data), "offset": offset})
+
+
 # ── API: Stock adjustment history  GET /<tenant>/api/adjustments/history ──────
 @_staff_required
 def adjustment_history(request, **kwargs):
@@ -1049,6 +1159,11 @@ def adjustment_history(request, **kwargs):
         total_added=Sum("quantity", filter=DQ(quantity__gt=0)),
     )
 
+    try:
+        offset = max(0, int(request.GET.get("offset", 0)))
+    except (ValueError, TypeError):
+        offset = 0
+
     data = [
         {
             "id": a.id,
@@ -1061,13 +1176,43 @@ def adjustment_history(request, **kwargs):
             "reason": a.reason,
             "notes": a.notes,
         }
-        for a in qs[:500]
+        for a in qs[offset:offset + 500]
     ]
 
     return JsonResponse({
         "results": data,
         "total": stats["total_count"] or 0,
         "showing": len(data),
+        "offset": offset,
         "total_removed": abs(stats["total_removed"] or 0),
         "total_added": stats["total_added"] or 0,
     })
+
+
+# ── Page: Change password  GET/POST /<tenant>/change-password/ ────────────────
+@login_required
+def change_password(request, **kwargs):
+    """Force-change password on first login or after admin reset."""
+    _require_tenant(request)
+    error = None
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password', '')
+        confirm = request.POST.get('confirm_password', '')
+        if new_password != confirm:
+            error = 'As senhas não coincidem.'
+        else:
+            try:
+                validate_password(new_password, request.user)
+            except ValidationError as e:
+                error = ' '.join(e.messages)
+        if not error:
+            from django.contrib.auth import update_session_auth_hash
+            request.user.set_password(new_password)
+            request.user.save()
+            request.user.userprofile.must_change_password = False
+            request.user.userprofile.temp_password = ''
+            request.user.userprofile.save()
+            update_session_auth_hash(request, request.user)
+            slug = request.tenant.subdomain
+            return redirect(f'/{slug}/' if request.user.is_staff else f'/{slug}/sale/')
+    return render(request, 'pos/change_password.html', {'error': error})
