@@ -8,6 +8,41 @@ project aims to follow [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.2.1] — 2026-06-24
+
+Bug fixes and full English localisation pass.
+
+### Fixed
+
+- **Adjustments KPI cards not rendering.** The page was fetching `/api/adjustments`
+  (the POST save endpoint) instead of `/api/adjustments/history`. Corrected to the
+  history endpoint. Also fixed `renderAdjStats` which called `data.summary` — a key
+  that doesn't exist; stats are now read from the top-level response fields
+  (`total`, `total_removed`) and `top_reason`/`unique_users` are derived from
+  `data.results` client-side.
+- **Employees page not rendering.** The template was doing a `fetch()` to
+  `/api/employees`, an endpoint that does not exist. `page_employees` is a server-side
+  view; the template has been rewritten to iterate the `{{ employees }}` context
+  queryset with Django template tags. Create / Reset / Delete actions use standard
+  POST forms instead of JavaScript fetch calls.
+
+### Changed
+
+- **Full English localisation.** All nine templates are now fully in English:
+  page titles, table headers, button labels, form labels, placeholders, toast
+  messages, and JavaScript string literals.  Database-stored Portuguese values
+  (catalogue action types) remain as `value` attributes in filter dropdowns but
+  display English labels client-side.
+- **US payment methods.** Sale page now uses Cash, Venmo, Zelle, PayPal, and
+  Credit Card instead of the original Mozambican mobile-money methods.
+- **USD currency.** All monetary displays now use `$` prefix with `en-US` locale
+  formatting instead of `MZN` suffix.
+- **Distinct donut chart colours.** The payment-methods donut on the dashboard now
+  assigns a distinct colour to each method; the fallback colour palette ensures no
+  two slices share a colour even for unrecognised method names.
+
+---
+
 ## [1.2.0] — 2026-06-24
 
 A performance and visibility pass: streaming CSV export, leaner ORM queries, a full
